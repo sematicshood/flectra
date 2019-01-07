@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<flectra>
+    <record id="view_stock_picking_form_inherited" model="ir.ui.view">
+        <field name="name">stock.picking.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <!--<xpath expr="//field[@name='picking_type_id']" position="after">-->
+                <!--<field name="eway_bill_id"/>-->
+            <!--</xpath>-->
+            <xpath expr="//page[@name='extra']/group" position="after">
+                <separator string="Transporter Detail"/>
+                <group>
+                    <group>
+                        <field name="trans_mode" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        <field name="distance"
+                               attrs="{'required': [('state', '=', 'assigned')], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        <field name="vehicle_no"
+                               attrs="{'required': [('trans_mode', '=', '1'), ('state', '=', 'assigned'), ('trans_id', '=', False)], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        <field name="vehicle_type"
+                               attrs="{'required': [('trans_mode', '=', '1'), ('state', '=', 'assigned')], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                    </group>
+                    <group>
+                        <field name="trans_partner_id" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                <field name="invoice_id" required="1"/>
+                        
+                        <field name="trans_id"
+                               attrs="{'required': [('trans_mode', '=', '1'), ('state', '=', 'assigned'), ('vehicle_no', '=', False)], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        <field name="trans_doc_number"
+                               attrs="{'required': [('trans_mode', '!=', '1'), ('state', '=', 'assigned')], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        <field name="trans_doc_date"
+                               attrs="{'required': [('trans_mode', '!=', '1'), ('state', '=', 'assigned')], 'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</flectra>

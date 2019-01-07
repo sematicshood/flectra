@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<flectra>
+    <record id="view_eway_bill_form_inherited" model="ir.ui.view">
+        <field name="name">eway.bill.form</field>
+        <field name="model">eway.bill</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Eway Bill">
+                <header>
+                    <button name="action_confirm" type="object" states="draft" string="Validate" class="oe_highlight"/>
+                    <button name="action_done" type="object" states="confirm" string="Done" class="oe_highlight"/>
+                    <button name="action_cancel" type="object" states="draft,confirm" string="Cancel"/>
+                    <button name="set_to_draft" states="cancel" string="Set to Draft" type="object"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,done" />
+                </header>
+                <sheet>
+                    <h1 class="hidden-xs">
+                        <field name="name" attrs="{'invisible': [('name','=','/')]}" readonly="1"/>
+                    </h1>
+                    <group>
+                         <group>
+                            <field name="ewayno"/>
+                            <field name="invoice_id" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}" 
+                                context="{'invoice': invoice_id or False}"/>
+                            
+                            <field name="sub_type_id" required="1" readonly="1" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="doc_date" readonly="1" force_save="1"/>
+                            <field name="invoice_type" invisible="" readonly="1" force_save="1"/>
+                            <field name="supply_type" readonly="1" force_save="1"/>
+                            <field name="picking_ids" force_save="1" readonly="1" required="1" widget="many2many_tags"/>
+                        </group>
+                        <group string="From Transporter">
+                            <field name="from_partner_id" readonly="1" force_save="1"/>
+                            <field name="dispatch_state" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        </group>
+                        <group string="To Transporter">
+                            <field name="to_partner_id" readonly="1" force_save="1"/>
+                            <field name="ship_to_state" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                        </group>
+
+                    </group>
+                    <notebook>
+                        <page name="lines" string="Item List">
+                            <field name="eway_product_lines">
+                                <tree string="Item List" editable="bottom">
+                                    <field name="product_id" readonly="1" force_save="1"/>
+                                    <field name="product_desc" readonly="1" force_save="1"/>
+                                    <field name="hsn_code" readonly="1" force_save="1"/>
+                                    <field name="qty" readonly="1" force_save="1"/>
+                                    <field name="uom_id" readonly="1" force_save="1"/>
+                                    <field name="asseseble_value" readonly="1" force_save="1"/>
+                                    <field name="total_tax_amount" readonly="1" force_save="1"/>
+                                    <field name="cgst_rate" readonly="1" force_save="1"/>
+                                    <field name="sgst_rate" readonly="1" force_save="1"/>
+                                    <field name="igst_rate" readonly="1" force_save="1"/>
+                                    <field name="cess_rate" readonly="1" force_save="1"/>
+                                </tree>
+                            </field>
+                            <separator/>
+                            <separator/>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="cgst_amount" readonly="1" force_save="1"/>
+                                <field name="sgst_amount" readonly="1" force_save="1"/>
+                                <field name="igst_amount" readonly="1" force_save="1"/>
+                                <field name="cess_amount" readonly="1" force_save="1"/>
+                                <field name="amount_total" force_save="1" readonly="1" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Transporter Detail">
+                            <group col="4">
+                                <field name="trans_mode" readonly="1" force_save="1"/>
+                                <field name="distance" readonly="1" force_save="1"/>
+                                <field name="trans_partner_id" readonly="1" force_save="1"/>
+                                <field name="trans_id" readonly="1" force_save="1"/>
+                                <field name="trans_doc_number" 
+                                    attrs="{'readonly': [('state', 'in', ['done','cancel'])]}"/>
+                                <field name="trans_doc_date" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                                <field name="vehicle_no" attrs="{'readonly': [('state', 'in', ['done', 'cancel'])]}"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_eway_bill_tree_inherited" model="ir.ui.view">
+        <field name="name">eway.bill.tree</field>
+        <field name="model">eway.bill</field>
+        <field name="arch" type="xml">
+            <tree string="Eway Bill">
+                <field name="ewayno"/>
+                <field name="name"/>
+                <field name="supply_type"/>
+                <field name="sub_type_id"/>
+                <field name="doc_date"/>
+                <field name="invoice_type"/>
+                <field name="invoice_id"/>
+            </tree>
+        </field>
+    </record>
+
+     <record id="act_open_eway_bill_view" model="ir.actions.act_window">
+        <field name="name">E-WAY Bill</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">eway.bill</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+
+</flectra>

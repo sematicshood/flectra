@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<flectra noupdate="1">
+        <!-- B2B SGST/CGST Invoices -->
+
+        <record id="demo_invoice_eway1" model="account.invoice">
+            <field name="date_due"
+                   eval="DateTime.today().strftime('%Y-%m-28')"/>
+            <field name="currency_id" ref="base.INR"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="reference_type">none</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="state">draft</field>
+            <field name="type">out_invoice</field>
+            <field name="date_invoice"
+                   eval="DateTime.today().strftime('%Y-%m-01')"/>
+            <field name="partner_id"
+                   ref="eway_bill.res_partner_gst_registered"/>
+        </record>
+
+        <record id="demo_invoice_eway_line1" model="account.invoice.line">
+            <field name="invoice_id" ref="demo_invoice_eway1"/>
+            <field name="name">Little server</field>
+            <field name="product_id" ref="product.consu_delivery_02"/>
+            <field name="account_id" ref="demo_p200112"/>
+            <field name="price_unit">40000.0</field>
+            <field name="quantity">2.0</field>
+        </record>
+
+        <function model="account.invoice.line" name="_onchange_product_id"
+                  eval="[ref('demo_invoice_eway_line1')]"/>
+
+        <record id="demo_invoice_eway_line2" model="account.invoice.line">
+            <field name="invoice_id" ref="demo_invoice_eway1"/>
+            <field name="name">Basic Computer</field>
+            <field name="product_id" ref="product.consu_delivery_03"/>
+            <field name="account_id" ref="demo_p200112"/>
+            <field name="price_unit">23500.0</field>
+            <field name="quantity">3.0</field>
+
+        </record>
+
+        <function model="account.invoice.line" name="_onchange_product_id"
+                  eval="[ref('demo_invoice_eway_line2')]"/>
+
+        <function model="account.invoice" name="_onchange_invoice_line_ids"
+                  eval="[ref('demo_invoice_eway1')]"/>
+
+        <function model="account.invoice" name="action_invoice_open"
+                  eval="[ref('demo_invoice_eway1')]"/>
+
+        <function model="account.invoice" name="create_picking"
+                  eval="[ref('demo_invoice_eway1')]"/>
+
+        <record id="demo_invoice_eway2" model="account.invoice">
+            <field name="date_due"
+                   eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-12')"/>
+            <field name="currency_id" ref="base.INR"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="reference_type">none</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="state">draft</field>
+            <field name="type">out_invoice</field>
+            <field name="date_invoice" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-07')"/>
+            <field name="partner_id"
+                   ref="eway_bill.res_partner_gst_registered"/>
+        </record>
+
+        <record id="demo_invoice_eway2_line1" model="account.invoice.line">
+            <field name="invoice_id" ref="demo_invoice_eway2"/>
+            <field name="name">Server</field>
+            <field name="product_id" ref="product.consu_delivery_01"/>
+            <field name="account_id" ref="demo_p200112"/>
+            <field name="price_unit">65000.0</field>
+            <field name="quantity">4.0</field>
+        </record>
+
+        <function model="account.invoice.line" name="_onchange_product_id"
+                  eval="[ref('demo_invoice_eway2_line1')]"/>
+
+        <record id="demo_invoice_eway2_line2" model="account.invoice.line">
+            <field name="invoice_id" ref="demo_invoice_eway2"/>
+            <field name="name">Basic Computer</field>
+            <field name="product_id" ref="product.consu_delivery_03"/>
+            <field name="account_id" ref="demo_p200112"/>
+            <field name="price_unit">23500.0</field>
+            <field name="quantity">1.0</field>
+        </record>
+
+        <function model="account.invoice.line" name="_onchange_product_id"
+                  eval="[ref('demo_invoice_eway2_line2')]"/>
+
+        <function model="account.invoice" name="_onchange_invoice_line_ids"
+                  eval="[ref('demo_invoice_eway2')]"/>
+
+        <function model="account.invoice" name="action_invoice_open"
+                  eval="[ref('demo_invoice_eway2')]"/>
+
+        <function model="account.invoice" name="create_picking"
+                  eval="[ref('demo_invoice_eway2')]"/>
+
+</flectra>

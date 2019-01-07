@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_company_b2c_limit_all,access_res_company_b2c_limit_all,model_res_company_b2c_limit,base.group_system,1,1,1,1
+access_res_company_b2c_limit,access_res_company_b2c_limit,model_res_company_b2c_limit,,1,0,0,0
+access_sub_type,access_sub_type,model_sub_type,,1,0,0,0
+access_eway_bill,access_eway_bill,model_eway_bill,,1,0,0,0
+access_eway_bill_line,access_eway_bill_line,model_eway_bill_line,,1,0,0,0

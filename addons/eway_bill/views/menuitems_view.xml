@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<flectra>
+
+    <!-- Eway Bill Menu -->
+
+    <menuitem name="Eway Bill"
+              id="eway_bill_menu"
+              parent="account.menu_finance_receivables_documents"
+              sequence="30"/>
+
+    <menuitem name="Eway Bill"
+              id="l10n_in_gst_eway_bill_menu"
+              action="act_open_eway_bill_view"
+              parent="eway_bill_menu"
+              sequence="31"/>
+
+</flectra>

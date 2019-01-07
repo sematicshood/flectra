@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<flectra>
+
+    <record id="view_create_eway_bill_wizard" model="ir.ui.view">
+        <field name="name">create.eway.bill.wizard.form</field>
+        <field name="model">generate.eway.bill</field>
+        <field name="arch" type="xml">
+            <form string="Create Eway Bill">
+                <group col="4">
+                    <field name="sub_type_id" />
+                    <field name="order_count" readonly="1"/>
+                    <!-- <field name="picking_id" domain="[('eway_bill_id', '=', False)]"
+                           context="{'check_picking': picking_id, 'check_invoice': invoice_id}"/> -->
+                    <field name="invoice_id" attrs="{'invisible': [('order_count', '!=', 1)]}"
+                    domain="[('eway_bill_id', '=', False)]"
+                    context="{'check_picking': picking_ids or False, 'check_invoice': invoice_id}"/>
+                    <field name="picking_ids" attrs="{'invisible': [('order_count', '!=', 1)]}"
+                        widget="many2many_tags" domain="[('eway_bill_id', '=', False)]" readonly="1"/>
+                    
+                </group>
+                <group>
+                    <field name="order_ids" nolabel="1" attrs="{'invisible': [('order_count', '=', 1)]}">
+                        <tree string="Eway bill" editable="bottom" create="0">
+                            <field name="picking_ids" widget="many2many_tags"
+                                   domain="[('picking_type_id.code', 'in', ['incoming', 'outgoing']), ('eway_bill_id', '=', False)]"/>
+                            <field name="invoice_id" domain="[('eway_bill_id', '=', False)]"
+                                   context="{'check_picking': picking_ids or False, 'check_invoice': invoice_id}"/>
+                        </tree>
+                    </field>
+                </group>
+                <footer>
+                    <button name="generate_eway" string="Generate Eway" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_create_eway_bill_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Generate EWay Bill</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">generate.eway.bill</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="context">{}</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- <act_window
+        id="action_create_eway_bill_picking"
+        name="Generate EWay Bill"
+        res_model="generate.eway.bill"
+        src_model="stock.picking"
+        domain="[('picking_type_id.code', 'in', ['incoming', 'outgoing'])]"
+        view_mode="form"
+        target="new"/> -->
+
+</flectra>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<flectra noupdate="1">
+    
+    <record id="demo_eway_1" model="eway.bill">
+        <field name="invoice_id" ref="demo_invoice_eway1"/>
+        <field name="supply_type">I</field>
+        <field name="invoice_type">INV</field>
+        <field name="from_partner_id" ref="res_partner_gst_registered"/>
+    </record>
+
+    <function model="eway.bill" name="onchange_invoice_id"
+                  eval="[ref('demo_eway_1')]"/>
+
+    <record id="demo_eway_2" model="eway.bill">
+        <field name="invoice_id" ref="demo_invoice_eway2"/>
+        <field name="supply_type">I</field>
+        <field name="invoice_type">INV</field>
+        <field name="from_partner_id" ref="res_partner_gst_registered"/>
+    </record>
+
+    <function model="eway.bill" name="onchange_invoice_id"
+                  eval="[ref('demo_eway_2')]"/>
+
+</flectra>
