@@ -143,8 +143,9 @@ class AccountChartTemplate(models.Model):
                 'bank_account_code_prefix': self.bank_account_code_prefix,
                 'cash_account_code_prefix': self.cash_account_code_prefix,
             })
-            wizard.onchange_chart_template_id()
-            wizard.execute()
+            if not wizard.existing_accounting(company):
+                wizard.onchange_chart_template_id()
+                wizard.execute()
 
     @api.multi
     def open_select_template_wizard(self):
@@ -192,17 +193,10 @@ class AccountChartTemplate(models.Model):
             return default_account
 
         journals = [{'name': _('Customer Invoices'), 'type': 'sale', 'code': _('INV'), 'favorite': True, 'color': 11, 'sequence': 5},
-                    {'name': _('Cash Sale'), 'type': 'sale', 'code': _('CSALE'), 'favorite': True, 'color': 11, 'sequence': 6},
-                    {'name': _('Credit Note'), 'type': 'sale', 'code': _('CRMEMO'), 'favorite': True, 'color': 11, 'sequence': 7},
-                    {'name': _('Vendor Bills'), 'type': 'purchase', 'code': _('BILL'), 'favorite': True, 'color': 11, 'sequence': 8},
-                    {'name': _('Cash Purchase'), 'type': 'purchase', 'code': _('CBILL'), 'favorite': True, 'color': 11, 'sequence': 9},
-                    {'name': _('Debit Note'), 'type': 'purchase', 'code': _('DRMEMO'), 'favorite': True, 'color': 11, 'sequence': 10},
-                    {'name': _('Miscellaneous Operations'), 'type': 'general', 'code': _('MISC'), 'favorite': False, 'sequence': 11},
-                    {'name': _('Exchange Difference'), 'type': 'general', 'code': _('EXCH'), 'favorite': False, 'sequence': 12},
-                    {'name': _('Expenses Journal'), 'type': 'general', 'code': _('EXP'), 'favorite': False, 'sequence': 13},
-                    {'name': _('Income journal'), 'type': 'general', 'code': _('INCM'), 'favorite': False, 'sequence': 14},
-                    {'name': _('Opening/Closing Journals'), 'type': 'general', 'code': _('OPCL'), 'favorite': False, 'sequence': 15},
-                    {'name': _('Cash Basis Tax Journal'), 'type': 'general', 'code': _('CABA'), 'favorite': False, 'sequence': 16}]
+                    {'name': _('Vendor Bills'), 'type': 'purchase', 'code': _('BILL'), 'favorite': True, 'color': 11, 'sequence': 6},
+                    {'name': _('Miscellaneous Operations'), 'type': 'general', 'code': _('MISC'), 'favorite': False, 'sequence': 7},
+                    {'name': _('Exchange Difference'), 'type': 'general', 'code': _('EXCH'), 'favorite': False, 'sequence': 9},
+                    {'name': _('Cash Basis Tax Journal'), 'type': 'general', 'code': _('CABA'), 'favorite': False, 'sequence': 10}]
         if journals_dict != None:
             journals.extend(journals_dict)
 
@@ -519,7 +513,7 @@ class AccountTaxTemplate(models.Model):
     amount_type = fields.Selection(default='percent', string="Tax Computation", required=True,
         selection=[('group', 'Group of Taxes'), ('fixed', 'Fixed'), ('percent', 'Percentage of Price'), ('division', 'Percentage of Price Tax Included')])
     active = fields.Boolean(default=True, help="Set active to false to hide the tax without removing it.")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.user.company_id)
     children_tax_ids = fields.Many2many('account.tax.template', 'account_tax_template_filiation_rel', 'parent_tax', 'child_tax', string='Children Taxes')
     sequence = fields.Integer(required=True, default=1,
         help="The sequence field is used to define order in which the tax lines are applied.")
