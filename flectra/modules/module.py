@@ -79,6 +79,7 @@ class AddonsHook(object):
 
         # execute source in context of module *after* putting everything in
         # sys.modules, so recursive import works
+        print ("READ--------",modfile)
         exec(open(modfile, 'rb').read(), new_mod.__dict__)
 
         # people import openerp.addons and expect openerp.addons.<module> to work
