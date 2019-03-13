@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
 
+from lxml import etree
+from lxml.html import builder as html
+
 from flectra import _, api, fields, models
 
 
