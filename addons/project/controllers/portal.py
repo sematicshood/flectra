@@ -171,7 +171,7 @@ class CustomerPortal(CustomerPortal):
             'date': date_begin,
             'date_end': date_end,
             'projects': projects,
-            'tasks': tasks, #TODO master remove this, grouped_tasks is enough
+            'tasks': tasks,
             'grouped_tasks': grouped_tasks,
             'page_name': 'task',
             'archive_groups': archive_groups,

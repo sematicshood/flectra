@@ -408,9 +408,10 @@ class Task(models.Model):
     name = fields.Char(string='Task Title', track_visibility='always', required=True, index=True)
     description = fields.Html(string='Description')
     priority = fields.Selection([
-        ('0', 'Low'),
-        ('1', 'Normal'),
-        ], default='0', index=True, string="Priority")
+        ('l', 'Low'),
+        ('m', 'Medium'),
+        ('h', 'High')
+        ], default='l', index=True, string="Priority")
     sequence = fields.Integer(string='Sequence', index=True, default=10,
         help="Gives the sequence order when displaying a list of tasks.")
     stage_id = fields.Many2one('project.task.type', string='Stage', track_visibility='onchange', index=True,
@@ -483,14 +484,10 @@ class Task(models.Model):
     working_days_close = fields.Float(compute='_compute_elapsed', string='Working days to close', store=True, group_operator="avg")
     # customer portal: include comment and incoming emails in communication history
     website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment'])])
-
     task_seq = fields.Char(
         string="Reference", track_visibility='onchange',
         default=lambda self: self.env['ir.sequence'].next_by_code(
             'project.task') or '/')
-    priority = fields.Selection([
-        ('l', 'Low'), ('m', 'Medium'), ('h', 'High'), ],
-        string="Priority", default='l')
     start_date = fields.Date(string="Start Date", track_visibility='onchange')
     end_date = fields.Date(string="End Date", track_visibility='onchange')
     actual_end_date = fields.Date(
