@@ -8,6 +8,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from flectra import api, exceptions, fields, models, _
+from flectra.tools import pycompat
 
 class SignupError(Exception):
     pass
