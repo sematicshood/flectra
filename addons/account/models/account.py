@@ -990,6 +990,7 @@ class AccountTax(models.Model):
             total_excluded = total_included = base = round(price_unit * quantity, prec)
         else:
             total_excluded, total_included, base = base_values
+
         # Sorting key is mandatory in this case. When no key is provided, sorted() will perform a
         # search. However, the search method is overridden in account.tax in order to add a domain
         # depending on the context. This domain might filter out some taxes from self, e.g. in the
