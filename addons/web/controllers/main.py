@@ -402,7 +402,7 @@ def _local_web_translations(trans_file):
     except Exception:
         return
     for x in po:
-        if x.id and x.string and "openerp-web" in x.auto_comments:
+        if x.id and x.string and ("openerp-web" in x.auto_comments or "flectra-web" in x.auto_comments):
             messages.append({'id': x.id, 'string': x.string})
     return messages
 
