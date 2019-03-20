@@ -69,6 +69,7 @@ class TestSaleStock(TestSale):
         and whatever other model there is in stock with "invoice on order" products
         """
         # let's cheat and put all our products to "invoice on order"
+
         self.so = self.env['sale.order'].create({
             'partner_id': self.partner.id,
             'partner_invoice_id': self.partner.id,
