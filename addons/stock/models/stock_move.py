@@ -1213,9 +1213,6 @@ class StockMove(models.Model):
         if picking:
             picking._create_backorder()
 
-        #calculate balance quantity & out qty to track the age of each stock
-        moves_todo.check_move_bal_qty()
-
         return moves_todo
 
     def unlink(self):
