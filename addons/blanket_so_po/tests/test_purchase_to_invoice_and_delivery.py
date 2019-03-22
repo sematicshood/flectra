@@ -45,7 +45,6 @@ class TestPurchaseOrder(TransactionCase):
         transfer_wizard.split_qty_wt_newline_po()
         self.assertEqual(remaining_qty, uom_qty - transfer_qty,
                          'Remaining to transfer qty is different')
-        total_po_line = len(self.po1.order_line)
         transfer_qty += 6
         remaining_qty = uom_qty - transfer_qty
         transfer_wizard = self.purchase_wizard.create(
@@ -73,4 +72,3 @@ class TestPurchaseOrder(TransactionCase):
             self.picking.action_done()
         except Exception as e:
             pass
-            logging.info('User will get error if any transfer is remains.')
