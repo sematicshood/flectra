@@ -2626,7 +2626,7 @@ class TestStockValuation(TransactionCase):
 
         move1.move_line_ids.qty_done = 15
 
-        self.assertAlmostEqual(self.product1.standard_price, 14.0)
+        self.assertAlmostEqual(self.product1.standard_price, 17.5)
 
     def test_average_negative_1(self):
         """ Test edit in the past. Receive 10, send 20, edit the second move to only send 10.
@@ -3185,7 +3185,7 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move1.remaining_value, 10)
         self.assertEqual(move1.remaining_qty, 1)
         self.assertAlmostEqual(self.product1.qty_available, 0.0)
-        self.assertAlmostEqual(self.product1.qty_at_date, 2.0)
+        self.assertAlmostEqual(self.product1.qty_at_date, 1.0)
         self.assertEqual(self.product1.stock_value, 10)
         self.assertTrue(len(move1.account_move_ids), 1)
 

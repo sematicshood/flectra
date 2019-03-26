@@ -22,7 +22,7 @@ class Website(models.Model):
 
     @api.one
     def _compute_pricelist_ids(self):
-        self.pricelist_ids = self.env["product.pricelist"].search([("website_id", "=", self.id)])
+        self.pricelist_ids = self.env["product.pricelist"].search([("website_ids", "in", self.id)])
 
     @api.multi
     def _compute_pricelist_id(self):
@@ -61,7 +61,7 @@ class Website(models.Model):
         if not pricelists:  # no pricelist for this country, or no GeoIP
             pricelists |= all_pl.filtered(lambda pl: not show_visible or pl.selectable or pl.id in (current_pl, order_pl))
         if not show_visible and not country_code:
-            pricelists |= all_pl.filtered(lambda pl: pl.sudo().code)
+            pricelists |= all_pl.filtered(lambda pl: not show_visible and pl.sudo().code)
 
         # This method is cached, must not return records! See also #8795
         return pricelists.ids
