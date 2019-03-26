@@ -126,3 +126,5 @@ class TestWebsitePriceList(TransactionCase):
             pls = self.get_pl(show, current_pl, country)
             self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
+
+

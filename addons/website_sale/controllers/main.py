@@ -1092,6 +1092,28 @@ class WebsiteSale(http.Controller):
         })
         return "/shop/product/%s?enable_editor=1" % slug(product.product_tmpl_id)
 
+    @http.route(['/shop/change_styles'], type='json', auth="public")
+    def change_styles(self, id, style_id):
+        product = request.env['product.template'].browse(id)
+
+        remove = []
+        active = False
+        style_id = int(style_id)
+        for style in product.website_style_ids:
+            if style.id == style_id:
+                remove.append(style.id)
+                active = True
+                break
+
+        style = request.env['product.style'].browse(style_id)
+
+        if remove:
+            product.write({'website_style_ids': [(3, rid) for rid in remove]})
+        if not active:
+            product.write({'website_style_ids': [(4, style.id)]})
+
+        return not active
+
     @http.route(['/shop/change_sequence'], type='json', auth="public")
     def change_sequence(self, id, sequence):
         product_tmpl = request.env['product.template'].browse(id)

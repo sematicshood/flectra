@@ -914,7 +914,9 @@ class TestReconciliation(AccountingTestCase):
         # Case 1: report date is invoice date
         # There should be an entry for the partner
         report_date_to = invoice.date_invoice
-        report_lines, total, amls = AgedReport._get_partner_move_lines(account_type, report_date_to, 'posted', 30)
+        report_lines, total, amls = AgedReport._get_partner_move_lines(
+            account_type, report_date_to, 'posted', 30,
+            self.env.user.company_id.branch_id.id)
 
         partner_lines = [line for line in report_lines if line['partner_id'] == partner.id]
         self.assertEqual(partner_lines, [{
@@ -939,7 +941,9 @@ class TestReconciliation(AccountingTestCase):
         # There should be an entry for the partner
         # And the amount has shifted to '1-30 due'
         report_date_to = time.strftime('%Y') + '-07-08'
-        report_lines, total, amls = AgedReport._get_partner_move_lines(account_type, report_date_to, 'posted', 30)
+        report_lines, total, amls = AgedReport._get_partner_move_lines(
+            account_type, report_date_to, 'posted', 30,
+            self.env.user.company_id.branch_id.id)
 
         partner_lines = [line for line in report_lines if line['partner_id'] == partner.id]
         self.assertEqual(partner_lines, [{
@@ -963,7 +967,9 @@ class TestReconciliation(AccountingTestCase):
         # Case 2: report date on payment date
         # There should not be an entry for the partner
         report_date_to = time.strftime('%Y') + '-07-15'
-        report_lines, total, amls = AgedReport._get_partner_move_lines(account_type, report_date_to, 'posted', 30)
+        report_lines, total, amls = AgedReport._get_partner_move_lines(
+            account_type, report_date_to, 'posted', 30,
+            self.env.user.company_id.branch_id.id)
 
         partner_lines = [line for line in report_lines if line['partner_id'] == partner.id]
         self.assertEqual(partner_lines, [], 'The aged receivable shouldn\'t have lines at this point')
