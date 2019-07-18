@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="ShowOrderButton">
+        <div class='control-button show-orders'>
+            <i class="fa fa-shopping-cart" />Show Orders
+        </div>
+    </t>
+
+    <t t-name="ShowOrderLines">
+        <tr class='order-line' t-att-data-id='order.id'>
+            <td><t t-esc='order.pos_reference' /></td>
+            <td><t t-esc='order.partner_id[1]' /></td>
+            <td><t t-esc='order.session_id[1]'/></td>
+            <td><t t-esc='order.amount_total'/></td>
+        </tr>
+    </t>
+
+    <t t-name="ShowOrdersWidget">
+        <div class="clientlist-screen screen">
+            <div class="screen-content">
+                <section class="top-content">
+                    <span class='button back'>
+                        <i class='fa fa-angle-double-left'></i>
+                        Cancel
+                    </span>
+                    <span class='searchbox' style="margin-left:217px !important;">
+                        <input placeholder='Search Orders by ref' />
+                        <span class='search-clear'></span>
+                    </span>
+                </section>
+                <section class="full-content">
+                    <div class='window'>
+                        <section class='subwindow collapsed'>
+                            <div class='subwindow-container collapsed'>
+                                <div class='subwindow-container-fix order-details-contents'>
+                                </div>
+                            </div>
+                        </section>
+                        <section class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix touch-scrollable scrollable-y'>
+                                    <table class='client-list'>
+                                        <thead>
+                                            <tr>
+                                                <th>Reciept Ref.</th>
+                                                <th>Partner</th>
+                                                <th>Session</th>
+                                                <th>Amount Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class='show-order-list-lines'>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+
+</templates> 
