@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<flectra>
+    <record id="invoice_form" model="ir.ui.view">
+        <field name="name">view.account.invoice.form.inherit</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[1]" position="inside">
+                <group attrs="{'invisible': [('auto_invoice_id', '=', False)]}">
+                    <field name="auto_generated" invisible="1"/>
+                    <label for="auto_invoice_id"/>
+                    <div class="oe_inline">
+                        <field name="auto_invoice_id"/>
+                        <span attrs="{'invisible': [('auto_generated', '=', False)]}">&#160;(<label for="auto_generated"/>)
+                        </span>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="invoice_supplier_form" model="ir.ui.view">
+        <field name="name">view.account.invoice.form.inherit</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[1]" position="inside">
+                <group attrs="{'invisible': [('auto_invoice_id', '=', False)]}">
+                    <label for="auto_invoice_id"/>
+                    <div class="oe_inline">
+                        <field name="auto_generated" invisible="1"/>
+                        <field name="auto_invoice_id"/>
+                        <span attrs="{'invisible': [('auto_generated', '=', False)]}">&#160;(<label for="auto_generated"/>)
+                        </span>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</flectra>
