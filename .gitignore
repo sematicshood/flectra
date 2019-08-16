@@ -19,11 +19,11 @@ status
 flectra/filestore
 # maintenance migration scripts
 flectra/addons/base/maintenance
-
+get-pip.py
 # generated for windows installer?
 install/win32/*.bat
 install/win32/meta.py
-
+setup/win32/*
 # needed only when building for win32
 setup/win32/static/less/
 setup/win32/static/wkhtmltopdf/
