@@ -38,3 +38,4 @@ setup/win32/static/postgresql*.exe
 /man/
 /share/
 /src/
+/addon/web/static/img/istockphoto*

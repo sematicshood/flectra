@@ -116,7 +116,7 @@ Var HWNDPostgreSQLPassword
 
 !define STATIC_PATH "static"
 !define PIXMAPS_PATH "${STATIC_PATH}\pixmaps"
-!define POSTGRESQL_EXE_FILENAME "postgresql-9.5.4-2-windows.exe"
+!define POSTGRESQL_EXE_FILENAME "postgresql-9.5.19-1-windows-x64.exe"
 !define POSTGRESQL_EXE "${STATIC_PATH}\${POSTGRESQL_EXE_FILENAME}"
 
 !define MUI_ABORTWARNING
@@ -208,8 +208,8 @@ Section $(TITLE_FLECTRA_Server) SectionFLECTRA_Server
     
     # Installing winpython
     SetOutPath "$INSTDIR\python"
-    File /r /x "__pycache__" "..\..\..\WinPython\python-3.6.2\*"
-
+    File /r /x "__pycache__" "..\..\..\WinPython\winpython-3.6.2\*"
+    #File /r /x "__pycache__" "..\..\..\python\*"
     SetOutPath "$INSTDIR\nssm"
     File /r /x "src" "..\..\..\nssm-2.24\*"
 
