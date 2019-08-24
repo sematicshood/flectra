@@ -68,9 +68,9 @@ upgrade_template = """
 	internet. 
 	<p></p>
         However the preferred method to upgrade the posbox is to flash the sd-card with
-        the <a href='http://nightly.flectrahq.com/trunk/posbox/'>latest image</a>. The upgrade
+        the <a href='http://nightly.flectra.com/trunk/posbox/'>latest image</a>. The upgrade
         procedure is explained into to the
-        <a href='https://userdoc.flectrahq.com/point_of_sale.html'>PosBox manual</a>
+        <a href='https://www.flectra.com/documentation/user/point_of_sale/posbox/index.html'>PosBox manual</a>
         </p>
         <p>
         To upgrade the posbox, click on the upgrade button. The upgrade will take a few minutes. <b>Do not reboot</b> the PosBox during the upgrade.
@@ -80,7 +80,7 @@ upgrade_template = """
         </p>
         <pre>
 """
-upgrade_template += subprocess.check_output("git --work-tree=/home/pi/flectra/ --git-dir=/home/pi/flectra/.git log -1", shell=True).decode('utf-8').replace("\n", "<br/>")
+upgrade_template += subprocess.check_output("git --work-tree=/home/pi/flectra/ --git-dir=/home/pi/flectra/.git log -1", shell=True).replace("\n", "<br/>")
 upgrade_template += """
         </pre>
         <div class='centering'>

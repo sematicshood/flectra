@@ -32,8 +32,7 @@ tour.register('test_survey', {
             trigger: 'button[value="next"]',
         },
         // Page-2
-        // Question: What do you think about the documentation available on
-        // doc.flectrahq.com?
+        // Question: What do you think about the documentation available on doc.flectra.com?
         {
             content: "For 'It is up-to-date' checking 'Totally disagree'",
             trigger: 'input[name="1_2_3_15"][value="11"]',

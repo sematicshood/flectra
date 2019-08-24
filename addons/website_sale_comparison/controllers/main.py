@@ -3,7 +3,6 @@ from flectra import http, _
 from flectra.http import request
 from flectra.addons.website_sale.controllers.main import WebsiteSale
 import json
-from collections import OrderedDict
 
 
 class WebsiteSaleProductComparison(WebsiteSale):
@@ -20,12 +19,12 @@ class WebsiteSaleProductComparison(WebsiteSale):
 
         res = {}
         for num, product in enumerate(products):
-            for var in product.attribute_line_ids.sorted(lambda x: x.attribute_id.sequence):
+            for var in product.attribute_line_ids:
                 cat_name = var.attribute_id.category_id.name or _('Uncategorized')
                 att_name = var.attribute_id.name
-                if not var.attribute_id.create_variant:
+                if not product.attribute_value_ids: # create_variant = False
                     continue
-                res.setdefault(cat_name, OrderedDict()).setdefault(att_name, [' - '] * len(products))
+                res.setdefault(cat_name, {}).setdefault(att_name, [' - '] * len(products))
                 val = product.attribute_value_ids.filtered(lambda x: x.attribute_id == var.attribute_id)
                 res[cat_name][att_name][num] = val[0].name
         values['specs'] = res

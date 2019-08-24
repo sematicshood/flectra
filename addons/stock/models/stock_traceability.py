@@ -92,7 +92,8 @@ class MrpStockReport(models.TransientModel):
                     ('lot_id', '=', context.get('active_id')),
                     ('location_id.usage', '!=', 'internal'),
                     ('state', '=', 'done'),
-                ]).filtered(lambda s: not s.move_id.returned_move_ids)
+                    ('move_id.returned_move_ids', '=', False),
+                ])
                 res += self._lines(line_id, model_id=model_id, model='stock.move.line', level=level, parent_quant=parent_quant,
                                   stream=stream, obj_ids=move_ids)
                 quant_ids = self.env['stock.quant'].search([
@@ -107,7 +108,8 @@ class MrpStockReport(models.TransientModel):
                     ('lot_id', '=', context.get('active_id')),
                     ('location_dest_id.usage', '!=', 'internal'),
                     ('state', '=', 'done'),
-                ]).filtered(lambda s: not s.move_id.returned_move_ids)
+                    ('move_id.returned_move_ids', '=', False),
+                ])
                 res += self._lines(line_id, model_id=model_id, model='stock.move.line', level=level, parent_quant=parent_quant,
                                   stream=stream, obj_ids=move_ids)
                 quant_ids = self.env['stock.quant'].search([
@@ -137,11 +139,10 @@ class MrpStockReport(models.TransientModel):
         res_model = ''
         ref = ''
         res_id = False
-        picking_id = move_line.picking_id or move_line.move_id.picking_id
-        if picking_id:
+        if move_line.picking_id:
             res_model = 'stock.picking'
-            res_id = picking_id.id
-            ref = picking_id.name
+            res_id = move_line.picking_id.id
+            ref = move_line.picking_id.name
         elif move_line.move_id.inventory_id:
             res_model = 'stock.inventory'
             res_id = move_line.move_id.inventory_id.id

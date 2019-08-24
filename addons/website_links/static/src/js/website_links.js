@@ -10,6 +10,7 @@ var base = require('web_editor.base');
 
 var qweb = core.qweb;
 var _t = core._t;
+var ZeroClipboard = window.ZeroClipboard;
 
 var exports = {};
 
@@ -107,8 +108,7 @@ if (!$('.o_website_links_create_tracked_url').length) {
             this.animating_copy = false;
         },
         start: function () {
-            // DO NOT FORWARD PORT ABOVE V11
-            new Clipboard(this.$('.btn_shorten_url_clipboard')[0]);
+            new ZeroClipboard(this.$('.btn_shorten_url_clipboard'));
         },
         toggle_copy_button: function () {
             var self = this;
@@ -258,6 +258,8 @@ if (!$('.o_website_links_create_tracked_url').length) {
 
     base.ready().done(function () {
 
+        ZeroClipboard.config({swfPath: window.location.origin + "/website_links/static/lib/zeroclipboard/ZeroClipboard.swf" });
+
         // UTMS selects widgets
         var campaign_select = new SelectBox('utm.campaign');
         campaign_select.start($("#campaign-select"), _t('e.g. Promotion of June, Winter Newsletter, ..'));
@@ -289,7 +291,7 @@ if (!$('.o_website_links_create_tracked_url').length) {
         });
 
         // Clipboard Library
-        new Clipboard($("#btn_shorten_url")[0]);
+        new ZeroClipboard($("#btn_shorten_url"));
 
         $("#generated_tracked_link a").click(function () {
             $("#generated_tracked_link a").text("Copied").removeClass("btn-primary").addClass("btn-success");

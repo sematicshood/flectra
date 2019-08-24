@@ -207,15 +207,11 @@ define([
         var layoutInfo = dom.makeLayoutInfo(target);
         /* FLECTRA: (start_modification */
         var $editable = layoutInfo.editable();
-        if (event.setStyleInfoFromEditable) {
-            var styleInfo = modules.editor.styleFromNode($editable);
-        } else {
-            if (!event.isDefaultPrevented()) {
-              modules.editor.saveRange($editable);
-            }
-            var styleInfo = modules.editor.currentStyle(target);
+        if (!event.isDefaultPrevented()) {
+          modules.editor.saveRange($editable);
         }
         /* FLECTRA: end_modification) */
+        var styleInfo = modules.editor.currentStyle(target);
         self.updateStyleInfo(styleInfo, layoutInfo);
       }, 0);
     };
@@ -365,7 +361,7 @@ define([
             (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
             (keycode > 218 && keycode < 223))) {   // [\]' (in order))
           eventName = 'visible';
-        } else if (!keycode && event.key !== 'Dead') {
+        } else if (!keycode) {
           self.invoke('restoreRange', $editable);
         }
         // FLECTRA: end_modification)

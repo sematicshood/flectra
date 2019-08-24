@@ -38,23 +38,19 @@ var FieldPdfViewer = FieldBinaryFile.extend({
     },
     /**
      * @private
-     * @param {string} [fileURI] file URI if specified
      * @returns {string} the pdf viewer URI
      */
-    _getURI: function (fileURI) {
+    _getURI: function () {
+        var queryObj = {
+            model: this.model,
+            field: this.name,
+            id: this.res_id,
+        };
         var page = this.recordData[this.name + '_page'] || 1;
-        if (!fileURI) {
-            var queryObj = {
-                model: this.model,
-                field: this.name,
-                id: this.res_id,
-            };
-            var queryString = $.param(queryObj);
-            fileURI = '/web/image?' + queryString
-        }
-        fileURI = encodeURIComponent(fileURI);
+        var queryString = $.param(queryObj);
+        var url = encodeURIComponent('/web/image?' + queryString);
         var viewerURL = '/web/static/lib/pdfjs/web/viewer.html?file=';
-        return viewerURL + fileURI + '#page=' + page;
+        return viewerURL + url + '#page=' + page;
     },
     /**
      * @private
@@ -98,16 +94,14 @@ var FieldPdfViewer = FieldBinaryFile.extend({
      */
     on_file_change: function (ev) {
         this._super.apply(this, arguments);
-        var files = ev.target.files;
-        if (!files || files.length === 0) {
-            return;
-        }
-        // TOCheck: is there requirement to fallback on FileReader if browser don't support URL
-        var fileURI = URL.createObjectURL(files[0]);
         if (this.PDFViewerApplication) {
-            this.PDFViewerApplication.open(fileURI, 0);
-        } else {
-            this.$('.o_pdfview_iframe').attr('src', this._getURI(fileURI));
+            var files = ev.target.files;
+            if (!files || files.length === 0) {
+              return;
+            }
+            var file = files[0];
+            // TOCheck: is there requirement to fallback on FileReader if browser don't support URL
+            this.PDFViewerApplication.open(URL.createObjectURL(file), 0);
         }
     },
     /**

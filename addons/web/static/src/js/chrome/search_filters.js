@@ -180,10 +180,8 @@ var DateTime = Field.extend({
     operators: [
         {value: "=", text: _lt("is equal to")},
         {value: "!=", text: _lt("is not equal to")},
-        {value: ">", text: _lt("is after")},
-        {value: "<", text: _lt("is before")},
-        {value: ">=", text: _lt("is after or equal")},
-        {value: "<=", text: _lt("is before or equal")},
+        {value: ">=", text: _lt("is after")},
+        {value: "<=", text: _lt("is before")},
         {value: "between", text: _lt("is between")},
         {value: "∃", text: _lt("is set")},
         {value: "∄", text: _lt("is not set")}
@@ -238,7 +236,7 @@ var DateTime = Field.extend({
     _create_new_widget: function (name) {
         this[name] = new (this._get_widget_class())(this);
         return this[name].appendTo(this.$el).then((function () {
-            this[name].setValue(moment());
+            this[name].setValue(moment(new Date()));
         }).bind(this));
     },
     _get_widget_class: function () {

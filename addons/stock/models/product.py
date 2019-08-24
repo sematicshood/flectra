@@ -132,19 +132,17 @@ class Product(models.Model):
 
         res = dict()
         for product in self.with_context(prefetch_fields=False):
-            product_id = product.id
-            rounding = product.uom_id.rounding
-            res[product_id] = {}
+            res[product.id] = {}
             if dates_in_the_past:
-                qty_available = quants_res.get(product_id, 0.0) - moves_in_res_past.get(product_id, 0.0) + moves_out_res_past.get(product_id, 0.0)
+                qty_available = quants_res.get(product.id, 0.0) - moves_in_res_past.get(product.id, 0.0) + moves_out_res_past.get(product.id, 0.0)
             else:
-                qty_available = quants_res.get(product_id, 0.0)
-            res[product_id]['qty_available'] = float_round(qty_available, precision_rounding=rounding)
-            res[product_id]['incoming_qty'] = float_round(moves_in_res.get(product_id, 0.0), precision_rounding=rounding)
-            res[product_id]['outgoing_qty'] = float_round(moves_out_res.get(product_id, 0.0), precision_rounding=rounding)
-            res[product_id]['virtual_available'] = float_round(
-                qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'],
-                precision_rounding=rounding)
+                qty_available = quants_res.get(product.id, 0.0)
+            res[product.id]['qty_available'] = float_round(qty_available, precision_rounding=product.uom_id.rounding)
+            res[product.id]['incoming_qty'] = float_round(moves_in_res.get(product.id, 0.0), precision_rounding=product.uom_id.rounding)
+            res[product.id]['outgoing_qty'] = float_round(moves_out_res.get(product.id, 0.0), precision_rounding=product.uom_id.rounding)
+            res[product.id]['virtual_available'] = float_round(
+                qty_available + res[product.id]['incoming_qty'] - res[product.id]['outgoing_qty'],
+                precision_rounding=product.uom_id.rounding)
 
         return res
 
@@ -159,7 +157,7 @@ class Product(models.Model):
         if self.env.context.get('company_owned', False):
             company_id = self.env.user.company_id.id
             return (
-                [('location_id.company_id', '=', company_id), ('location_id.usage', 'in', ['internal', 'transit'])],
+                [('location_id.company_id', '=', company_id)],
                 [('location_id.company_id', '=', False), ('location_dest_id.company_id', '=', company_id)],
                 [('location_id.company_id', '=', company_id), ('location_dest_id.company_id', '=', False),
             ])
@@ -260,9 +258,7 @@ class Product(models.Model):
 
         # TODO: Still optimization possible when searching virtual quantities
         ids = []
-        # Order the search on `id` to prevent the default order on the product name which slows
-        # down the search because of the join on the translation table to get the translated names.
-        for product in self.with_context(prefetch_fields=False).search([], order='id'):
+        for product in self.with_context(prefetch_fields=False).search([]):
             if OPERATORS[operator](product[field], value):
                 ids.append(product.id)
         return [('id', 'in', ids)]

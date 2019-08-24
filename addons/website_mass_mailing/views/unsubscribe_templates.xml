@@ -30,7 +30,7 @@
                             </ul>
 
                             <div class="text-center mb16">
-                                <button type="submit" id="send_form" class="btn btn-primary">Update my subscriptions</button>
+                                <input type="submit" id="send_form" class="btn btn-primary" value="Update my subscriptions"/>
                             </div>
                         </t>
 

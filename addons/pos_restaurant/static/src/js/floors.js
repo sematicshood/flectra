@@ -259,8 +259,7 @@ var TableWidget = PosBaseWidget.extend({
                         args: [[['id', '=', table_id]], fields],
                         limit: 1,
                     })
-                    .then(function (result){
-                        var table = result[0];
+                    .then(function (table){
                         for (var field in table) {
                             self.table[field] = table[field];
                         }

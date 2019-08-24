@@ -14,13 +14,13 @@ from operator import itemgetter
 from flectra import api, fields, models, _
 from flectra.addons.base.res.res_partner import _tz_get
 from flectra.exceptions import ValidationError
-from flectra.tools.float_utils import float_compare, float_round
+from flectra.tools.float_utils import float_compare
 
 
 def float_to_time(float_hour):
     if float_hour == 24.0:
         return datetime.time.max
-    return datetime.time(int(math.modf(float_hour)[1]), int(float_round(60 * math.modf(float_hour)[0], precision_digits=0)), 0)
+    return datetime.time(int(math.modf(float_hour)[1]), int(60 * math.modf(float_hour)[0]), 0)
 
 
 def to_naive_user_tz(datetime, record):
@@ -89,10 +89,6 @@ class ResourceCalendar(models.Model):
         'resource.calendar.leaves', 'calendar_id', 'Global Leaves',
         domain=[('resource_id', '=', False)]
         )
-    tz = fields.Selection(
-        _tz_get, string='Timezone', required=True,
-        default=lambda self: self._context.get('tz') or self.env.user.tz or 'UTC',
-        help="This field is used in order to define in which timezone the resources will work.")
 
     # --------------------------------------------------
     # Utility methods
@@ -421,13 +417,12 @@ class ResourceCalendar(models.Model):
         if not end_dt:
             end_dt = datetime.datetime.combine(start_dt.date(), datetime.time.max)
 
-        if not self.env.context.get('no_tz_convert', False):
-            start_dt = to_naive_user_tz(start_dt, self.env.user)
-            end_dt = to_naive_user_tz(end_dt, self.env.user)
+        start_dt = to_naive_user_tz(start_dt, self.env.user)
+        end_dt = to_naive_user_tz(end_dt, self.env.user)
 
         for day in rrule.rrule(rrule.DAILY,
                                dtstart=start_dt,
-                               until=end_dt.replace(hour=23, minute=59, second=59, microsecond=999999),
+                               until=end_dt,
                                byweekday=self._get_weekdays()):
             start_time = datetime.time.min
             if day.date() == start_dt.date():
@@ -456,7 +451,7 @@ class ResourceCalendar(models.Model):
 
         for day in rrule.rrule(rrule.DAILY,
                                dtstart=start_dt,
-                               until=end_dt.replace(hour=23, minute=59, second=59, microsecond=999999),
+                               until=end_dt,
                                byweekday=self._get_weekdays()):
             start_time = datetime.time.min
             if day.date() == start_dt.date():

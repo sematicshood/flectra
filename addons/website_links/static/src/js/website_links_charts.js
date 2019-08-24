@@ -61,7 +61,6 @@ if (!$('.o_website_links_chart').length) {
                 var chart = nv.models.lineChart()
                     .x(function (d) { return getDate(d); })
                     .y(function (d) { return getNbClicks(d); })
-                    .margin({top: 10, right: 60, bottom: 60, left: 60})
                     .showYAxis(true)
                     .showXAxis(true);
 
@@ -75,7 +74,7 @@ if (!$('.o_website_links_chart').length) {
 
                 chart.yAxis
                     .tickFormat(d3.format("d"))
-                    .ticks(Math.min(chart_data[0]['values'].length - 1, 10));
+                    .ticks(chart_data[0]['values'].length - 1);
 
                 d3.select(self.$element + ' svg')
                     .datum(chart_data)

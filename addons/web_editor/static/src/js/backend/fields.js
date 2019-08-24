@@ -219,8 +219,7 @@ var FieldTextHtmlSimple = basic_fields.DebouncedField.extend(TranslatableFieldMi
         this.$content = this.$('.note-editable:first');
         this.$content.html(this._textToHtml(this.value));
         // trigger a mouseup to refresh the editor toolbar
-        var mouseupEvent = $.Event('mouseup', {'setStyleInfoFromEditable': true});
-        this.$content.trigger(mouseupEvent);
+        this.$content.trigger('mouseup');
         if (this.nodeOptions['style-inline']) {
             transcoder.styleToClass(this.$content);
             transcoder.imgToFont(this.$content);

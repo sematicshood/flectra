@@ -9,7 +9,7 @@
     'sequence': 5,
     'summary': 'Leads, Opportunities, Activities',
     'description': "",
-    'website': 'https://flectrahq.com/crm',
+    'website': 'https://flectrahq.com/page/crm',
     'depends': [
         'base_setup',
         'sales_team',
@@ -19,9 +19,8 @@
         'fetchmail',
         'utm',
         'web_planner',
-        'contacts',
-        'digest',
-        'base_branch_company'
+        'web_tour',
+        'contacts'
     ],
     'data': [
         'security/crm_security.xml',
@@ -30,7 +29,6 @@
         'data/crm_data.xml',
         'data/crm_stage_data.xml',
         'data/crm_lead_data.xml',
-        'data/digest_data.xml',
         'data/mail_template_data.xml',
 
         'wizard/base_partner_merge_views.xml',
@@ -50,7 +48,6 @@
         'report/crm_activity_report_views.xml',
         'report/crm_opportunity_report_views.xml',
         'views/crm_team_views.xml',
-        'views/digest_views.xml',
     ],
     'demo': [
         'data/crm_demo.xml',

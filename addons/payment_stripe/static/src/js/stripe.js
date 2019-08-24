@@ -21,13 +21,9 @@ flectra.define('payment_stripe.stripe', function(require) {
         $.blockUI.defaults.css["background-color"] = '';
         $.blockUI.defaults.overlayCSS["opacity"] = '0.9';
     }
-    var stripeHandler;
     function getStripeHandler()
     {
-        if (stripeHandler) {
-            return stripeHandler;
-        }
-        var handler = stripeHandler = StripeCheckout.configure({
+        var handler = StripeCheckout.configure({
             key: $("input[name='stripe_key']").val(),
             image: $("input[name='stripe_image']").val(),
             locale: 'auto',
@@ -97,7 +93,7 @@ flectra.define('payment_stripe.stripe', function(require) {
         }
 
         var access_token = $("input[name='access_token']").val() || $("input[name='token']").val() || '';
-        var so_id = $("input[name='return_url']").val().match(/[quote|order]s?\/([0-9]+)/) || undefined;
+        var so_id = $("input[name='return_url']").val().match(/quote\/([0-9]+)/) || undefined;
         if (so_id) {
             so_id = parseInt(so_id[1]);
         }
@@ -151,10 +147,7 @@ flectra.define('payment_stripe.stripe', function(require) {
                     access_token: access_token,
                     acquirer_id: acquirer_id
             }).then(function (data) {
-                var $pay_stripe = $('#pay_stripe').detach();
                 try { provider_form.innerHTML = data; } catch (e) {};
-                // Restore 'Pay Now' button HTML since data might have changed it.
-                $(provider_form).find('#pay_stripe').replaceWith($pay_stripe);
             });
         }
         create_tx.done(function () {

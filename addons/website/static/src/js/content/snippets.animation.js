@@ -678,7 +678,6 @@ registry.gallery = Animation.extend({
      * @param {Event} ev
      */
     _onClickImg: function (ev) {
-        var self = this;
         var $cur = $(ev.currentTarget);
 
         var urls = [];
@@ -723,12 +722,7 @@ registry.gallery = Animation.extend({
         $modal.find('.modal-content, .modal-body.o_slideshow').css('height', '100%');
         $modal.appendTo(document.body);
 
-        $modal.one('shown.bs.modal', function () {
-            self.trigger_up('animation_start_demand', {
-                editableMode: false,
-                $target: $modal.find('.modal-body.o_slideshow'),
-            });
-        });
+        this.carousel = new registry.gallery_slider($modal.find('.carousel').carousel());
     },
 });
 
@@ -862,7 +856,7 @@ registry.socialShare = Animation.extend({
         var hashtags = ' #'+ document.title.split(" | ")[1].replace(' ','') + ' ' + this.hashtags;  // company name without spaces (for hashtag)
         var social_network = {
             'facebook': 'https://www.facebook.com/sharer/sharer.php?u=' + url,
-            'twitter': 'https://twitter.com/intent/tweet?original_referer=' + url + '&text=' + encodeURIComponent(title + hashtags + ' - ') + url,
+            'twitter': 'https://twitter.com/intent/tweet?original_referer=' + url + '&text=' + encodeURIComponent(title + hashtags + ' - ' + url),
             'linkedin': 'https://www.linkedin.com/shareArticle?mini=true&url=' + url + '&title=' + encodeURIComponent(title),
             'google-plus': 'https://plus.google.com/share?url=' + url,
         };

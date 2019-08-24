@@ -13,7 +13,7 @@
         <attribute name="groups">!sale.group_sale_layout</attribute>
     </xpath>
     <xpath expr="//table" position="after">
-        <t groups="sale.group_sale_layout" t-foreach="o.order_lines_layouted()" t-as="page" name="lines_layouted">
+        <t groups="sale.group_sale_layout" t-if="1 == 2" t-foreach="o.order_lines_layouted()" t-as="page" name="lines_layouted">
             <table class="table table-condensed">
                 <thead>
                     <tr>
@@ -23,7 +23,6 @@
                         <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Disc.(%)</th>
                         <th class="text-right">Taxes</th>
                         <th class="text-right">Amount</th>
-                        <th class="text-right">Total</th>
                     </tr>
                 </thead>
                 <tbody class="invoice_tbody">

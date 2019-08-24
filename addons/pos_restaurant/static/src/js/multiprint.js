@@ -139,10 +139,8 @@ models.Orderline = models.Orderline.extend({
         }
     },
     set_dirty: function(dirty) {
-        if (this.mp_dirty !== dirty) {
-            this.mp_dirty = dirty;
-            this.trigger('change', this);
-        }
+        this.mp_dirty = dirty;
+        this.trigger('change',this);
     },
     get_line_diff_hash: function(){
         if (this.get_note()) {

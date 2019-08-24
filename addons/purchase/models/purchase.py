@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from flectra import api, fields, models, SUPERUSER_ID, _
 from flectra.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from flectra.tools.float_utils import float_is_zero, float_compare
-from flectra.exceptions import UserError, AccessError, ValidationError
+from flectra.exceptions import UserError, AccessError
 from flectra.tools.misc import formatLang
 from flectra.addons.base.res.res_partner import WARNING_MESSAGE, WARNING_HELP
 from flectra.addons import decimal_precision as dp
@@ -336,7 +336,6 @@ class PurchaseOrder(models.Model):
             'default_template_id': template_id,
             'default_composition_mode': 'comment',
             'custom_layout': "purchase.mail_template_data_notification_email_purchase_order",
-            'purchase_mark_rfq_sent': True,
             'force_email': True
         })
         return {
@@ -400,11 +399,10 @@ class PurchaseOrder(models.Model):
             if order.state in ('draft', 'sent', 'to approve'):
                 for order_line in order.order_line:
                     if order_line.move_dest_ids:
-                        move_dest_ids = order_line.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
-                        siblings_states = (move_dest_ids.mapped('move_orig_ids')).mapped('state')
+                        siblings_states = (order_line.move_dest_ids.mapped('move_orig_ids')).mapped('state')
                         if all(state in ('done', 'cancel') for state in siblings_states):
-                            move_dest_ids.write({'procure_method': 'make_to_stock'})
-                            move_dest_ids._recompute_state()
+                            order_line.move_dest_ids.write({'procure_method': 'make_to_stock'})
+                            order_line.move_dest_ids._recompute_state()
 
             for pick in order.picking_ids.filtered(lambda r: r.state != 'cancel'):
                 pick.action_cancel()
@@ -485,20 +483,10 @@ class PurchaseOrder(models.Model):
                     'sequence': max(line.product_id.seller_ids.mapped('sequence')) + 1 if line.product_id.seller_ids else 1,
                     'product_uom': line.product_uom.id,
                     'min_qty': 0.0,
-                    'price': self.currency_id.compute(line.price_unit, currency, round=False),
+                    'price': self.currency_id.compute(line.price_unit, currency),
                     'currency_id': currency.id,
                     'delay': 0,
                 }
-                # In case the order partner is a contact address, a new supplierinfo is created on
-                # the parent company. In this case, we keep the product name and code.
-                seller = line.product_id._select_seller(
-                    partner_id=line.partner_id,
-                    quantity=line.product_qty,
-                    date=line.order_id.date_order and line.order_id.date_order[:10],
-                    uom_id=line.product_uom)
-                if seller:
-                    supplierinfo['product_name'] = seller.product_name
-                    supplierinfo['product_code'] = seller.product_code
                 vals = {
                     'seller_ids': [(0, 0, supplierinfo)],
                 }
@@ -513,7 +501,7 @@ class PurchaseOrder(models.Model):
         This function returns an action that display existing picking orders of given purchase order ids.
         When only one found, show the picking immediately.
         '''
-        action = self.env.ref('stock.action_picking_tree_all')
+        action = self.env.ref('stock.action_picking_tree')
         result = action.read()[0]
 
         #override the context to get rid of the default filtering on operation type
@@ -538,7 +526,11 @@ class PurchaseOrder(models.Model):
         result = action.read()[0]
 
         #override the context to get rid of the default filtering
-        result['context'] = {'type': 'in_invoice', 'default_purchase_id': self.id}
+        result['context'] = {
+            'type': 'in_invoice',
+            'default_purchase_id': self.id,
+            'default_branch_id': self.branch_id.id
+        }
 
         if not self.invoice_ids:
             # Choose a default account journal in the same currency in case a new invoice is created
@@ -561,8 +553,6 @@ class PurchaseOrder(models.Model):
             res = self.env.ref('account.invoice_supplier_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = self.invoice_ids.id
-        result['context']['default_origin'] = self.name
-        result['context']['default_reference'] = self.partner_ref
         return result
 
     @api.multi
@@ -594,7 +584,7 @@ class PurchaseOrderLine(models.Model):
             taxes = line.product_id.supplier_taxes_id.filtered(lambda r: not line.company_id or r.company_id == line.company_id)
             line.taxes_id = fpos.map_tax(taxes, line.product_id, line.order_id.partner_id) if fpos else taxes
 
-    @api.depends('invoice_lines.invoice_id.state', 'invoice_lines.quantity', 'invoice_lines.uom_id')
+    @api.depends('invoice_lines.invoice_id.state', 'invoice_lines.quantity')
     def _compute_qty_invoiced(self):
         for line in self:
             qty = 0.0
@@ -738,7 +728,7 @@ class PurchaseOrderLine(models.Model):
         if line.product_uom.id != line.product_id.uom_id.id:
             price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
         if order.currency_id != order.company_id.currency_id:
-            price_unit = order.currency_id.with_context(date=order.date_approve).compute(price_unit, order.company_id.currency_id, round=False)
+            price_unit = order.currency_id.compute(price_unit, order.company_id.currency_id, round=False)
         return price_unit
 
     @api.multi
@@ -758,7 +748,7 @@ class PurchaseOrderLine(models.Model):
             'name': self.name or '',
             'product_id': self.product_id.id,
             'product_uom': self.product_uom.id,
-            'date': self.order_id.date_approve,
+            'date': self.order_id.date_order,
             'date_expected': self.date_planned,
             'location_id': self.order_id.partner_id.property_stock_supplier.id,
             'location_dest_id': self.order_id._get_destination_location(),
@@ -792,11 +782,9 @@ class PurchaseOrderLine(models.Model):
     def _create_stock_moves(self, picking):
         moves = self.env['stock.move']
         done = self.env['stock.move'].browse()
-        with self.env.norecompute():
-            for line in self:
-                for val in line._prepare_stock_moves(picking):
-                    done += moves.create(val)
-        self.recompute()
+        for line in self:
+            for val in line._prepare_stock_moves(picking):
+                done += moves.create(val)
         return done
 
     @api.multi
@@ -994,7 +982,7 @@ class ProcurementRule(models.Model):
     def _get_purchase_order_date(self, product_id, product_qty, product_uom, values, partner, schedule_date):
         """Return the datetime value to use as Order Date (``date_order``) for the
            Purchase Order created to satisfy the given procurement. """
-        seller = product_id.with_context(force_company=values['company_id'].id)._select_seller(
+        seller = product_id._select_seller(
             partner_id=partner,
             quantity=product_qty,
             date=fields.Date.to_string(schedule_date),
@@ -1004,7 +992,7 @@ class ProcurementRule(models.Model):
 
     def _update_purchase_order_line(self, product_id, product_qty, product_uom, values, line, partner):
         procurement_uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
-        seller = product_id.with_context(force_company=values['company_id'].id)._select_seller(
+        seller = product_id._select_seller(
             partner_id=partner,
             quantity=line.product_qty + procurement_uom_po_qty,
             date=line.order_id.date_order and line.order_id.date_order[:10],
@@ -1170,7 +1158,7 @@ class MailComposeMessage(models.TransientModel):
 
     @api.multi
     def mail_purchase_order_on_send(self):
-        if self._context.get('purchase_mark_rfq_sent'):
+        if not self.filtered('subtype_id.internal'):
             order = self.env['purchase.order'].browse(self._context['default_res_id'])
             if order.state == 'draft':
                 order.state = 'sent'
@@ -1178,7 +1166,6 @@ class MailComposeMessage(models.TransientModel):
     @api.multi
     def send_mail(self, auto_commit=False):
         if self._context.get('default_model') == 'purchase.order' and self._context.get('default_res_id'):
-            order = self.env['purchase.order'].browse(self._context['default_res_id'])
-            self = self.with_context(mail_post_autofollow=True, lang=order.partner_id.lang)
+            self = self.with_context(mail_post_autofollow=True)
             self.mail_purchase_order_on_send()
         return super(MailComposeMessage, self).send_mail(auto_commit=auto_commit)

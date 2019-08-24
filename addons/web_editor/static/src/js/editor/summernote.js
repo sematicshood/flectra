@@ -1075,14 +1075,7 @@ $.summernote.pluginEvents.untab = function (event, editor, layoutInfo) {
 $.summernote.pluginEvents.up = function (event, editor, layoutInfo) {
     var r = range.create();
     var node = dom.firstChild(r.sc.childNodes[r.so] || r.sc);
-    if (!r.isOnCell()) {
-        return;
-    }
-    // check if an ancestor between node and cell has content before
-    var ancestor = dom.ancestor(node, function (ancestorNode) {
-        return dom.hasContentBefore(ancestorNode) || dom.isCell(ancestorNode);
-    });
-    if (!dom.isCell(ancestor) && (!dom.isBR(dom.hasContentBefore(ancestor)) || !dom.isText(node) || dom.isVisibleText(node) || dom.hasContentBefore(dom.hasContentBefore(ancestor)))) {
+    if (!r.isOnCell() || (!dom.isCell(node) && dom.hasContentBefore(node) && (!dom.isBR(dom.hasContentBefore(node)) || !dom.isText(node) || dom.isVisibleText(node) || dom.hasContentBefore(dom.hasContentBefore(node))))) {
         return;
     }
     event.preventDefault();
@@ -1099,14 +1092,7 @@ $.summernote.pluginEvents.up = function (event, editor, layoutInfo) {
 $.summernote.pluginEvents.down = function (event, editor, layoutInfo) {
     var r = range.create();
     var node = dom.firstChild(r.sc.childNodes[r.so] || r.sc);
-    if (!r.isOnCell()) {
-        return;
-    }
-    // check if an ancestor between node and cell has content after
-    var ancestor = dom.ancestor(node, function (ancestorNode) {
-        return dom.hasContentAfter(ancestorNode) || dom.isCell(ancestorNode);
-    });
-    if (!dom.isCell(ancestor) && (!dom.isBR(dom.hasContentAfter(ancestor)) || !dom.isText(node) || dom.isVisibleText(node) || dom.hasContentAfter(dom.hasContentAfter(ancestor)))) {
+    if (!r.isOnCell() || (!dom.isCell(node) && dom.hasContentAfter(node) && (!dom.isBR(dom.hasContentAfter(node)) || !dom.isText(node) || dom.isVisibleText(node) || dom.hasContentAfter(dom.hasContentAfter(node))))) {
         return;
     }
     event.preventDefault();
@@ -1891,15 +1877,6 @@ $.summernote.pluginEvents.formatBlock = function (event, editor, layoutInfo, sTa
     if (!r) {
         return;
     }
-    // select content since container (that firefox selects) may be removed
-    if (r.so === 0) {
-        r.sc = dom.firstChild(r.sc);
-    }
-    if (dom.nodeLength(r.ec) >= r.eo) {
-        r.ec = dom.lastChild(r.ec);
-        r.eo = dom.nodeLength(r.ec);
-    }
-    r = range.create(r.sc, r.so, r.ec, r.eo);
     r.reRange().select();
 
     if (sTagName === "blockquote" || sTagName === "pre") {
@@ -1913,10 +1890,6 @@ $.summernote.pluginEvents.formatBlock = function (event, editor, layoutInfo, sTa
     for (var i=0; i<nodes.length; i++) {
         if (dom.isBR(nodes[i]) || (dom.isText(nodes[i]) && dom.isVisibleText(nodes[i])) || dom.isB(nodes[i]) || dom.isU(nodes[i]) || dom.isS(nodes[i]) || dom.isI(nodes[i]) || dom.isFont(nodes[i])) {
             var ancestor = dom.ancestor(nodes[i], isFormatNode);
-            if ($(ancestor).parent().is('blockquote')) {
-                // firefox may wrap formatting block in blockquote
-                $(ancestor).unwrap();
-            }
             if (!ancestor) {
                 dom.wrap(nodes[i], sTagName);
             } else if (ancestor.tagName.toLowerCase() !== sTagName) {
@@ -2299,8 +2272,7 @@ options.onCreateLink = function (sLinkUrl) {
       // pass
     } else if (sLinkUrl.indexOf('@') !== -1 && sLinkUrl.indexOf(':') === -1) {
       sLinkUrl =  'mailto:' + sLinkUrl;
-    } else if (sLinkUrl.indexOf('://') === -1 && sLinkUrl[0] !== '/'
-               && sLinkUrl[0] !== '#' && sLinkUrl.slice(0, 2) !== '${') {
+    } else if (sLinkUrl.indexOf('://') === -1 && sLinkUrl.indexOf('/') !== 0 && sLinkUrl.indexOf('#') !== 0) {
       sLinkUrl = 'http://' + sLinkUrl;
     }
     return sLinkUrl;

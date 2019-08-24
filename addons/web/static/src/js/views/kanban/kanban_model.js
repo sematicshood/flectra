@@ -222,9 +222,6 @@ var KanbanModel = BasicModel.extend({
             options.groupBy = this.defaultGroupedBy;
         }
         var def = this._super(id, options);
-        if (options && options.loadMoreOffset) {
-            return def;
-        }
         return this._reloadProgressBarGroupFromRecord(id, def);
     },
     /**

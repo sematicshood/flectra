@@ -31,6 +31,7 @@
             <form string="Point of Sale Configuration">
                 <sheet>
                     <field name="currency_id" invisible="1"/>
+                    <field name="is_installed_account_accountant" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
                             <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
@@ -117,7 +118,7 @@
                             <div class="o_setting_right_pane">
                                 <label for="is_posbox"/>
                                 <div class="text-muted">
-                                    Use an integrated hardware setup like <a href="https://userdoc.flectrahq.com/point_of_sale/overview/setup.html" target="_blank">PosBox</a>
+                                    Use an integrated hardware setup like <a href="https://www.flectra.com/documentation/user/online/point_of_sale/overview/setup.html" target="_blank">PosBox</a>
                                 </div>
                                 <div class="content-group" attrs="{'invisible' : [('is_posbox', '=', False)]}">
                                     <div class="row mt16">
@@ -159,7 +160,7 @@
                                 <field name="barcode_scanner"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="barcode_scanner" string="Barcode Scanner"/>
+                                <label for="barcode_nomenclature_id" string="Barcode Scanner"/>
                                 <div class="text-muted">
                                     Set barcodes to scan products, customer cards, etc.
                                 </div>
@@ -177,7 +178,7 @@
                                 <field name="tax_regime_selection"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="tax_regime_selection" string="Fiscal Position per Order"/>
+                                <label for="fiscal_position_ids" string="Fiscal Position per Order"/>
                                 <div class="text-muted">
                                     Choose among several tax regimes when processing an order
                                 </div>
@@ -196,7 +197,7 @@
                                 <field name="tax_regime"/>
                             </div>
                             <div class="o_setting_right_pane">
-                                <label for="tax_regime" string="Fiscal Position"/>
+                                <label for="default_fiscal_position_id" string="Fiscal Position"/>
                                 <div class="text-muted">
                                     Use a default specific tax regime
                                 </div>
@@ -220,7 +221,7 @@
                                     <div class="mt16">
                                         <field name="iface_tax_included" class="o_light_label" widget="radio"/>
                                     </div>
-                                    <a attrs="{'invisible': [('iface_tax_included', '!=', 'total')]}" href="https://userdoc.flectrahq.com/accounting/others/taxes/tax_included.html" target="_blank" class="oe-link"><i class="fa fa-fw fa-arrow-right"/>How to manage tax-included prices</a>
+                                    <a attrs="{'invisible': [('iface_tax_included', '!=', 'total')]}" href="https://www.flectra.com/documentation/user/11.0/accounting/others/taxes/tax_included.html"  target="_blank" class="oe-link"><i class="fa fa-fw fa-arrow-right"/>How to manage tax-included prices</a>
                                 </div>
                             </div>
                         </div>
@@ -374,7 +375,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-md-6 o_setting_box" id="auto_printing">
+                        <div class="col-xs-12 col-md-6 o_setting_box" id="auto_printing" attrs="{'invisible': [('is_posbox', '=', False)]}">
                             <div class="o_setting_left_pane">
                                 <field name="iface_print_auto"/>
                             </div>
@@ -383,7 +384,7 @@
                                 <div class="text-muted">
                                     Print receipts automatically once the payment registered
                                 </div>
-                                <div class="content-group mt16" attrs="{'invisible' : ['|', ('iface_print_auto', '=', False), ('is_posbox', '=', False)]}">
+                                <div class="content-group mt16" attrs="{'invisible' : [('iface_print_auto', '=', False)]}">
                                     <div>
                                         <field name="iface_print_skip_screen" class="oe_inline"/><span class="oe_inline"><b>Skip Preview Screen</b></span>
                                     </div>
@@ -418,8 +419,7 @@
                                 <div class="content-group mt16" attrs="{'invisible': [('iface_invoicing', '=', False)]}">
                                     <div class="row mt16">
                                         <label string="Invoice Journal" for="invoice_journal_id" class="col-md-3 o_light_label"/>
-                                        <field name="invoice_journal_id"
-                                               attrs="{'required': [('iface_invoicing', '=', True)]}"/>
+                                        <field name="invoice_journal_id"/>
                                     </div>
                                 </div>
                             </div>
@@ -434,7 +434,7 @@
                                     Operation type used to record product pickings
                                 </div>
                                 <div class="content-group mt16">
-                                    <field name="picking_type_id" required="1"/>
+                                    <field name="picking_type_id"/>
                                 </div>
                             </div>
                         </div>
@@ -450,9 +450,9 @@
                             </div>
                         </div>
                     </div>
-                    <h2>Accounting</h2>
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-xs-12 col-md-6 o_setting_box" title="Whenever you close a session, one entry is generated in the following accounting journal for all the orders not invoiced. Invoices are recorded in accounting separately.">
+                    <h2 attrs="{'invisible': [('is_installed_account_accountant', '=', False)]}">Accounting</h2>
+                    <div class="row mt16 o_settings_container" attrs="{'invisible': [('is_installed_account_accountant', '=', False)]}">
+                        <div class="col-xs-12 col-md-6 o_setting_box">
                             <div class="o_setting_right_pane">
                                 <label string="Journal Entries"/>
                                 <div class="text-muted">

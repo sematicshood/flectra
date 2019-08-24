@@ -135,7 +135,7 @@ class Location(models.Model):
                  ('lot_stock_id', 'in', record.ids),
                  ('wh_output_stock_loc_id', 'in', record.ids)])
             for warehouse_id in warehouses_ids:
-                if record.branch_id and warehouse_id.branch_id and record.branch_id != warehouse_id.branch_id:
+                if record.branch_id and record.branch_id != warehouse_id.branch_id:
                     raise ValidationError(
                         _('Configuration Error of Branch:\n'
                           'The Location Branch (%s) and '
@@ -231,11 +231,6 @@ class Route(models.Model):
     product_ids = fields.Many2many('product.template', 'stock_route_product', 'route_id', 'product_id', 'Products')
     categ_ids = fields.Many2many('product.category', 'stock_location_route_categ', 'route_id', 'categ_id', 'Product Categories')
     warehouse_ids = fields.Many2many('stock.warehouse', 'stock_route_warehouse', 'route_id', 'warehouse_id', 'Warehouses')
-
-    @api.onchange('warehouse_selectable')
-    def _onchange_warehouse_selectable(self):
-        if not self.warehouse_selectable:
-            self.warehouse_ids = []
 
     def write(self, values):
         '''when a route is deactivated, deactivate also its pull and push rules'''

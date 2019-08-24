@@ -4,7 +4,6 @@
 from . import account_bank_statement
 from . import account_journal
 from . import barcode_rule
-from . import digest
 from . import pos_category
 from . import pos_config
 from . import pos_order

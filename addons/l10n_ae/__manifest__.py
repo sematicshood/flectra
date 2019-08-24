@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo, Flectra. See LICENSE file for full copyright
-# and licensing details.
+# Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
 
 # Copyright (C) 2014 Tech Receptives (<http://techreceptives.com>)
 
@@ -18,7 +17,6 @@ United Arab Emirates accounting chart and localization.
     'data': [
              'data/account_data.xml',
              'data/l10n_ae_chart_data.xml',
-             'data/account_fiscal_position_data.xml',
-             'data/account_chart_template_data.yml'
+             'data/account_chart_template_data.yml',
     ],
 }

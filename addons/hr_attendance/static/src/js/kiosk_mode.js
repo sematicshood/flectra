@@ -35,7 +35,6 @@ var KioskMode = Widget.extend({
 
     _onBarcodeScanned: function(barcode) {
         var self = this;
-        core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         this._rpc({
                 model: 'hr.employee',
                 method: 'attendance_scan',
@@ -46,10 +45,7 @@ var KioskMode = Widget.extend({
                     self.do_action(result.action);
                 } else if (result.warning) {
                     self.do_warn(result.warning);
-                    core.bus.on('barcode_scanned', self, self._onBarcodeScanned);
                 }
-            }, function () {
-                core.bus.on('barcode_scanned', self, self._onBarcodeScanned);
             });
     },
 

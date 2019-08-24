@@ -177,12 +177,18 @@ var DomainTree = DomainNode.extend({
      * operator from the domain.
      * @see DomainTree._addFlattenedChildren
      */
-    init: function (parent, model, domain) {
+    init: function (parent, model, domain, options) {
         this._super.apply(this, arguments);
-        var parsedDomain = this._parseDomain(domain);
-        if (parsedDomain) {
-            this._initialize(parsedDomain);
+        try {
+            domain = Domain.prototype.stringToArray(domain);
+        } catch (err) {
+            // TODO: domain could contain `parent` for example, which is
+            // currently not handled by the DomainSelector
+            this.invalidDomain = true;
+            this.children = [];
+            return;
         }
+        this._initialize(domain);
     },
     /**
      * @see DomainNode.start
@@ -380,23 +386,6 @@ var DomainTree = DomainNode.extend({
             });
         }).bind(this));
     },
-    /**
-     * @param {string} domain
-     * @returns {Array[]}
-     */
-    _parseDomain: function (domain) {
-        var parsedDomain = false;
-        try {
-            parsedDomain = Domain.prototype.stringToArray(domain);
-            this.invalidDomain = false;
-        } catch (err) {
-            // TODO: domain could contain `parent` for example, which is
-            // currently not handled by the DomainSelector
-            this.invalidDomain = true;
-            this.children = [];
-        }
-        return parsedDomain;
-    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -482,17 +471,14 @@ var DomainSelector = DomainTree.extend({
      * If the internal domain value was already equal to the given one, this
      * does nothing.
      *
-     * @param {string} domain
+     * @param {Array|string} domain
      * @returns {Deferred} resolved when the rerendering is finished
      */
     setDomain: function (domain) {
-        if (domain === Domain.prototype.arrayToString(this.getDomain())) {
+        if (Domain.prototype.arrayToString(domain) === Domain.prototype.arrayToString(this.getDomain())) {
             return $.when();
         }
-        var parsedDomain = this._parseDomain(domain);
-        if (parsedDomain) {
-            return this._redraw(parsedDomain);
-        }
+        return this._redraw(domain);
     },
 
     //--------------------------------------------------------------------------

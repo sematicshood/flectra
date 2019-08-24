@@ -19,10 +19,7 @@ class HrPayrollStructure(models.Model):
 
     @api.model
     def _get_parent(self):
-        if self.env.user.company_id.id == self.env.ref(
-                'base.base.main_company', False):
-            return self.env.ref('hr_payroll.structure_base', False)
-        return False
+        return self.env.ref('hr_payroll.structure_base', False)
 
     name = fields.Char(required=True)
     code = fields.Char(string='Reference', required=True)

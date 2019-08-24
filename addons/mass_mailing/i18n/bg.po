@@ -330,7 +330,7 @@ msgid "Cancel"
 msgstr "Откажи"
 
 #. module: mass_mailing
-#. flectra-web
+#. openerp-web
 #: code:addons/mass_mailing/static/src/xml/mass_mailing.xml:5
 #, python-format
 msgid "Change Style"

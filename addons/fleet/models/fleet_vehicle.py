@@ -14,7 +14,7 @@ class FleetVehicle(models.Model):
 
     def _get_default_state(self):
         state = self.env.ref('fleet.vehicle_state_active', raise_if_not_found=False)
-        return state if state and state.id else False
+        return state and state.id or False
 
     name = fields.Char(compute="_compute_vehicle_name", store=True)
     active = fields.Boolean('Active', default=True, track_visibility="onchange")
@@ -51,7 +51,6 @@ class FleetVehicle(models.Model):
     fuel_type = fields.Selection([
         ('gasoline', 'Gasoline'),
         ('diesel', 'Diesel'),
-        ('lpg', 'LPG'),
         ('electric', 'Electric'),
         ('hybrid', 'Hybrid')
         ], 'Fuel Type', help='Fuel Used by the vehicle')

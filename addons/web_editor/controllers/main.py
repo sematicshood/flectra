@@ -50,16 +50,11 @@ class Web_Editor(http.Controller):
 
         kwargs.update(trans)
 
-        content = None
-        if model:
-            Model = request.env[model].with_context(trans)
-            if kwargs.get('res_id'):
-                record = Model.browse(kwargs.get('res_id'))
-                content = record and getattr(record, field)
-            else:
-                content = Model.default_get([field]).get(field)
+        record = None
+        if model and kwargs.get('res_id'):
+            record = request.env[model].with_context(trans).browse(kwargs.get('res_id'))
 
-        kwargs.update(content=content or '')
+        kwargs.update(content=record and getattr(record, field) or "")
 
         return request.render(kwargs.get("template") or "web_editor.FieldTextHtml", kwargs, uid=request.uid)
 
@@ -385,17 +380,7 @@ class Web_Editor(http.Controller):
 
             # Create a view to extend the template which adds the original file to link the new modified version instead
             IrUiView = request.env["ir.ui.view"]
-
-            def views_linking_url(view):
-                """
-                Returns whether the view arch has some html link tag linked to the url.
-
-                (note: searching for the URL string is not enough as it could appear in a comment or an xpath expression.)
-                """
-                return bool(etree.XML(view.arch).xpath("//link[@href='{}']".format(url)))
-
-            view_to_xpath = IrUiView.get_related_views(bundle_xmlid, bundles=True).filtered(views_linking_url)
-
+            view_to_xpath = IrUiView.get_related_views(bundle_xmlid, bundles=True).filtered(lambda v: v.arch.find(url) >= 0)
             IrUiView.create(dict(
                 name = custom_url,
                 mode = "extension",

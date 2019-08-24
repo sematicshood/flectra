@@ -712,9 +712,6 @@
                     </span>
                 </div>
                 <div class="centered-content touch-scrollable">
-                    <div class="button print_invoice">
-                        <i class='fa fa-print'></i> Print Invoice
-                    </div>
                     <div class="button print">
                         <i class='fa fa-print'></i> Print Receipt
                     </div>
@@ -1120,7 +1117,7 @@
         <div class="modal-dialog">
             <div class="popup popup-textinput">
                 <p class="title"><t t-esc=" widget.options.title || '' " /></p>
-                <textarea><t t-esc="widget.options.value" /></textarea>
+                <textarea rows="10" cols="40"><t t-esc="widget.options.value" /></textarea>
                 <div class="footer">
                     <div class="button confirm">
                         Ok 

@@ -16,7 +16,7 @@ class report_product_pricelist(models.AbstractModel):
         quantities = self._get_quantity(data)
         return {
             'doc_ids': data.get('ids', data.get('active_ids')),
-            'doc_model': 'product.pricelist',
+            'doc_model': 'hr.contribution.register',
             'docs': products,
             'data': dict(
                 data,

@@ -642,15 +642,13 @@ var relativedelta = py.type('relativedelta', null, {
         this._fix();
     },
     _fix: function () {
-        var self = this;
         var months = asJS(this.ops.months);
         if (Math.abs(months) > 11) {
             var s = months > 0 ? 1 : -1;
-            utils.divmod(months * s, 12, function (years, months) {
-                self.ops.months = py.float.fromJSON(months*s);
-                self.ops.years = py.float.fromJSON(
-                    asJS(self.ops.years) + years*s);
-            });
+            var r = utils.divmod(months * s, 12);
+            this.ops.months = py.float.fromJSON(r.mod*s);
+            this.ops.years = py.float.fromJSON(
+                asJS(this.ops.years) + r.div*s);
         }
         this._has_time = 0;
     },

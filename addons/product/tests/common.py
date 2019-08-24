@@ -36,7 +36,6 @@ class TestProductCommon(common.SavepointCase):
         cls.product_1 = Product.create({
             'name': 'Courage',
             'type': 'consu',
-            'default_code': 'PROD-1',
             'uom_id': cls.uom_dunit.id,
             'uom_po_id': cls.uom_dunit.id})
 

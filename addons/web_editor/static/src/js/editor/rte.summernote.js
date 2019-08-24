@@ -881,10 +881,7 @@ eventHandler.attach = function (oLayoutInfo, options) {
 
             show_tooltip = true;
             setTimeout(function () {
-                // Do not show tooltip on double-click and if there is already one
-                if (!show_tooltip || $target.attr('title') !== undefined) {
-                    return;
-                }
+                if (!show_tooltip) return;
                 $target.tooltip({title: _t('Double-click to edit'), trigger: 'manuel', container: 'body'}).tooltip('show');
                 setTimeout(function () {
                     $target.tooltip('destroy');

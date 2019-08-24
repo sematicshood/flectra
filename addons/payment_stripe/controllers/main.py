@@ -27,7 +27,7 @@ class StripeController(http.Controller):
         try:
             acquirer.s2s_process(post)
         except Exception as e:
-            error = str(e)
+            error = e.message
 
         return_url = post.get('return_url', '/')
         if error:

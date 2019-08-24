@@ -85,7 +85,7 @@ class MrpProductProduce(models.TransientModel):
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     lot_id = fields.Many2one('stock.production.lot', string='Lot')
     produce_line_ids = fields.One2many('mrp.product.produce.line', 'product_produce_id', string='Product to Track')
-    product_tracking = fields.Selection(related="product_id.tracking", readonly=True)
+    product_tracking = fields.Selection(related="product_id.tracking")
 
     @api.multi
     def do_produce(self):
@@ -100,10 +100,8 @@ class MrpProductProduce(models.TransientModel):
                 if self.product_id.tracking != 'none':
                     qty_to_add = float_round(quantity * move.unit_factor, precision_rounding=rounding)
                     move._generate_consumed_move_line(qty_to_add, self.lot_id)
-                elif len(move._get_move_lines()) < 2:
-                    move.quantity_done += float_round(quantity * move.unit_factor, precision_rounding=rounding)
                 else:
-                    move._set_quantity_done(quantity * move.unit_factor)
+                    move.quantity_done += float_round(quantity * move.unit_factor, precision_rounding=rounding)
         for move in self.production_id.move_finished_ids:
             if move.product_id.tracking == 'none' and move.state not in ('done', 'cancel'):
                 rounding = move.product_uom.rounding
@@ -133,7 +131,6 @@ class MrpProductProduce(models.TransientModel):
                 existing_move_line.product_uom_qty += self.product_qty
                 existing_move_line.qty_done += self.product_qty
             else:
-                location_dest_id = produce_move.location_dest_id.get_putaway_strategy(self.product_id).id or produce_move.location_dest_id.id
                 vals = {
                   'move_id': produce_move.id,
                   'product_id': produce_move.product_id.id,
@@ -143,7 +140,7 @@ class MrpProductProduce(models.TransientModel):
                   'qty_done': self.product_qty,
                   'lot_id': self.lot_id.id,
                   'location_id': produce_move.location_id.id,
-                  'location_dest_id': location_dest_id,
+                  'location_dest_id': produce_move.location_dest_id.id,
                 }
                 self.env['stock.move.line'].create(vals)
 

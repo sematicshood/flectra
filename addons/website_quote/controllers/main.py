@@ -4,7 +4,6 @@
 import werkzeug
 
 from flectra import exceptions, fields, http, _
-from flectra.tools import formatLang
 from flectra.http import request
 from flectra.addons.portal.controllers.portal import get_records_pager
 from flectra.addons.sale.controllers.portal import CustomerPortal
@@ -21,7 +20,7 @@ class CustomerPortal(CustomerPortal):
         except exceptions.AccessError:
             pass
         else:
-            if order_sudo.template_id and order_sudo.template_id.active and order_sudo.state in ['draft', 'sent']:
+            if order_sudo.template_id and order_sudo.template_id.active:
                 return request.redirect('/quote/%s/%s' % (order, access_token or ''))
         return super(CustomerPortal, self).portal_order_page(order=order, access_token=access_token, **kw)
 
@@ -128,17 +127,8 @@ class sale_quote(http.Controller):
             _message_post_helper(message=message, res_id=order_id, res_model='sale.order', **{'token': token} if token else {})
         return werkzeug.utils.redirect("/quote/%s/%s?message=2" % (order_id, token))
 
-    # Deprecated because override opportunities are **really** limited
-    # In fact it should be removed in master ASAP
     @http.route(['/quote/update_line'], type='json', auth="public", website=True)
     def update(self, line_id, remove=False, unlink=False, order_id=None, token=None, **post):
-        values = self.update_line_dict(line_id, remove, unlink, order_id, token, **post)
-        if values:
-            return [values['order_line_product_uom_qty'], values['order_amount_total']]
-        return values
-
-    @http.route(['/quote/update_line_dict'], type='json', auth="public", website=True)
-    def update_line_dict(self, line_id, remove=False, unlink=False, order_id=None, token=None, input_quantity=False, **kwargs):
         Order = request.env['sale.order'].sudo().browse(int(order_id))
         if token != Order.access_token:
             return request.render('website.404')
@@ -148,27 +138,10 @@ class sale_quote(http.Controller):
         if unlink:
             OrderLine.unlink()
             return False
-
-        if input_quantity is not False:
-            quantity = input_quantity
-        else:
-            number = -1 if remove else 1
-            quantity = OrderLine.product_uom_qty + number
-
-        if quantity < 0:
-            quantity = 0.0
+        number = -1 if remove else 1
+        quantity = OrderLine.product_uom_qty + number
         OrderLine.write({'product_uom_qty': quantity})
-        currency = Order.currency_id
-        format_price = partial(formatLang, request.env, digits=currency.decimal_places)
-
-        return {
-            'order_line_product_uom_qty': str(quantity),
-            'order_line_price_total': format_price(OrderLine.price_total),
-            'order_line_price_subtotal': format_price(OrderLine.price_subtotal),
-            'order_amount_total': format_price(Order.amount_total),
-            'order_amount_untaxed': format_price(Order.amount_untaxed),
-            'order_amount_tax': format_price(Order.amount_tax),
-        }
+        return [str(quantity), str(Order.amount_total)]
 
     @http.route(["/quote/template/<model('sale.quote.template'):quote>"], type='http', auth="user", website=True)
     def template_view(self, quote, **post):

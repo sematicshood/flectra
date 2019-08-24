@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
-import tarfile
-import uuid
 
 import babel.messages.pofile
 import base64
@@ -47,12 +45,6 @@ from flectra.http import content_disposition, dispatch_rpc, request, \
 from flectra.exceptions import AccessError, UserError
 from flectra.models import check_method_name
 from flectra.service import db
-import requests
-
-from flectra.tools import config
-from flectra import release
-from flectra.http import root
-from ..models.crypt import *
 
 _logger = logging.getLogger(__name__)
 
@@ -70,8 +62,6 @@ env.filters["json"] = json.dumps
 BUNDLE_MAXAGE = 60 * 60 * 24 * 7
 
 DBNAME_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9_.-]+$'
-FILENAME = 'licence'
-EXT = 'key'
 
 #----------------------------------------------------------
 # Flectra Web helpers
@@ -402,7 +392,7 @@ def _local_web_translations(trans_file):
     except Exception:
         return
     for x in po:
-        if x.id and x.string and ("openerp-web" in x.auto_comments or "flectra-web" in x.auto_comments):
+        if x.id and x.string and "openerp-web" in x.auto_comments:
             messages.append({'id': x.id, 'string': x.string})
     return messages
 
@@ -443,12 +433,6 @@ def binary_content(xmlid=None, model='ir.attachment', id=None, field='datas', un
 #----------------------------------------------------------
 # Flectra Web web Controllers
 #----------------------------------------------------------
-
-server_url = 'https://store.flectrahq.com'
-tmp_dir_path = tempfile.gettempdir()
-data_dir = os.path.join(config.options['data_dir'], 'addons', release.series)
-
-
 class Home(http.Controller):
 
     @http.route('/', type='http', auth="none")
@@ -565,99 +549,6 @@ class Home(http.Controller):
                                                      options=context)
         return True
 
-    @http.route(['/web/get_app_store_mode'], type='json', auth="user")
-    def get_app_store_mode(self, **kwargs):
-        if request.env.user.has_group('base.group_system'):
-            app_store = config.get('app_store')
-            return app_store if app_store in ['install', 'download', 'disable'] else 'download'
-        return False
-
-    @http.route(['/web/app_action'], type='json', auth="user")
-    def app_action(self, action='', module_name='', **kwargs):
-        if request.env.user.has_group('base.group_system') and config.get('app_store') == 'install':
-            if module_name and action:
-                module = request.env['ir.module.module'].search([('state', '=', 'installed'), ('name', '=', module_name)], limit=1)
-                if module:
-                    module.button_immediate_uninstall()
-                    return {"success": "Module is successfully uninstalled."}
-            return {"error": "Module not found or Module already uninstalled."}
-        return False
-
-    @http.route(['/web/get_modules'], type='json', auth="user")
-    def get_modules(self, **kwargs):
-        if request.env.user.has_group('base.group_system') and config.get('app_store') in ['install', 'download']:
-            try:
-                modules = request.env['ir.module.module'].search_read([('state', '=', 'installed')], fields=['name'])
-                p = requests.post(server_url + '/flectrahq/get_modules', data=kwargs)
-                data = json.loads(p.content.decode('utf-8'))
-                data.update({
-                    'installed_modules': [m['name'] for m in modules],
-                    'store_url': server_url
-                })
-                return data
-            except:
-                return False
-        return False
-
-    @http.route(['/web/module_download/<string:id>'], type='http', auth="user", methods=['GET', 'POST'])
-    def app_download(self, id=None, **kwargs):
-        if request.env.user.has_group('base.group_system') and config.get('app_store') in ['install', 'download']:
-            dbuuid = request.env['ir.config_parameter'].get_param('database.uuid')
-            p = requests.get(server_url + '/flectrahq/get_module_zip/' + str(id), params={'dbuuid': dbuuid})
-            try:
-                data = json.loads(p.content.decode('utf-8'))
-                if data.get('error', False):
-                    return json.dumps(data)
-            except:
-                pass
-            name = p.headers.get('Content-Disposition', False)
-            if name and name.startswith('filename='):
-                zip = p.content
-                headers = [('Content-Type', 'application/zip'),
-                           ('Content-Length', len(zip)),
-                           ('Content-Disposition', p.headers.get('Content-Disposition', 'dummy') + '.tar.gz')]
-                response = request.make_response(zip, headers)
-                return response
-            else:
-                return request.not_found()
-        return request.not_found()
-
-    @http.route(['/web/app_download_install'], type='json', auth="user")
-    def app_download_install(self, checksum=None, module_name=None, id=None, **kwargs):
-        if request.env.user.has_group('base.group_system') and config.get('app_store') == 'install':
-            IrModule = request.env['ir.module.module']
-            try:
-                res_download = requests.get(server_url + '/flectrahq/get_module_zip/' + str(id))
-                downloaded_file_checksum = hashlib.sha1(res_download.content or b'').hexdigest()
-                if res_download.status_code == 200:
-                    try:
-                        data = json.loads(res_download.content.decode('utf-8'))
-                        if data.get('error', False):
-                            return data
-                    except:
-                        pass
-                    if checksum == downloaded_file_checksum:
-                        path = os.path.join(tmp_dir_path, uuid.uuid4().hex)
-                        try:
-                            with open(path, 'wb') as f:
-                                f.write(res_download.content)
-                            with tarfile.open(path) as tar:
-                                tar.extractall(data_dir)
-                        except:
-                            return {"error": "Internal Server Error"}
-                        finally:
-                            IrModule.update_list()
-                            root.load_addons()
-                            if module_name:
-                                modules = IrModule.search([('name', '=', module_name)], limit=1)
-                                modules.button_immediate_install()
-                            os.remove(path)
-                            return {"success": "Module is successfully installed."}
-                    else:
-                        return {"error": "File crashed when downloading."}
-            except:
-                return {"error": "Internal Server Error"}
-        return False
 
 
 class WebClient(http.Controller):
@@ -748,7 +639,7 @@ class WebClient(http.Controller):
         translations_per_module = {}
         messages = request.env['ir.translation'].sudo().search_read([
             ('module', 'in', mods), ('lang', '=', lang),
-            ('comments', 'like', 'flectra-web'), ('value', '!=', False),
+            ('comments', 'like', 'openerp-web'), ('value', '!=', False),
             ('value', '!=', '')],
             ['module', 'src', 'value', 'lang'], order='module')
         for mod, msg_group in itertools.groupby(messages, key=operator.itemgetter('module')):
@@ -899,8 +790,6 @@ class Database(http.Controller):
     @http.route('/web/database/restore', type='http', auth="none", methods=['POST'], csrf=False)
     def restore(self, master_pwd, backup_file, name, copy=False):
         try:
-            data_file = None
-            db.check_super(master_pwd)
             with tempfile.NamedTemporaryFile(delete=False) as data_file:
                 backup_file.save(data_file)
             db.restore_db(name, data_file.name, str2bool(copy))
@@ -909,8 +798,7 @@ class Database(http.Controller):
             error = "Database restore error: %s" % (str(e) or repr(e))
             return self._render_template(error=error)
         finally:
-            if data_file:
-                os.unlink(data_file.name)
+            os.unlink(data_file.name)
 
     @http.route('/web/database/change_password', type='http', auth="none", methods=['POST'], csrf=False)
     def change_password(self, master_pwd, master_pwd_new):
@@ -1012,8 +900,7 @@ class Session(http.Controller):
             'state': json.dumps({'d': request.db, 'u': ICP.get_param('web.base.url')}),
             'scope': 'userinfo',
         }
-        return 'https://accounts.flectrahq.com/oauth2/auth?' + \
-               werkzeug.url_encode(params)
+        return 'https://accounts.flectra.com/oauth2/auth?' + werkzeug.url_encode(params)
 
     @http.route('/web/session/destroy', type='json', auth="user")
     def destroy(self):
@@ -1446,7 +1333,7 @@ class Export(http.Controller):
                       'relation_field': field.get('relation_field')}
             records.append(record)
 
-            if len(id.split('/')) < 3 and 'relation' in field:
+            if len(name.split('/')) < 3 and 'relation' in field:
                 ref = field.pop('relation')
                 record['value'] += '/id'
                 record['params'] = {'model': ref, 'prefix': id, 'name': name}
@@ -1867,50 +1754,3 @@ class ReportController(http.Controller):
     @http.route(['/report/check_wkhtmltopdf'], type='json', auth="user")
     def check_wkhtmltopdf(self):
         return request.env['ir.actions.report'].get_wkhtmltopdf_state()
-
-class LicensingController(http.Controller):
-    @http.route('/flectra/licensing', type='http', auth="user")
-    def download(self, contract_id=None, type=None, binary='', **kwargs):
-        if type == 'offline':
-            filename = '%s.%s' % (FILENAME, EXT)
-            content = binary
-            return request.make_response(
-                content,
-                headers=[
-                    ('Content-Type', 'plain/text' or 'application/octet-stream'),
-                    ('Content-Disposition', content_disposition(filename))
-                ]
-            )
-        elif type == 'online':
-            error = {
-                'code': 200,
-                'message': "<h5>Invalid License Key</h5>",
-                'success': False
-            }
-            try:
-                if contract_id:
-                    data = {
-                        'data': binary,
-                        'contract_id': contract_id
-                    }
-                    p = requests.post(
-                        server_url + '/my/contract/validate/online',
-                        params=data,
-                        headers={'Content-type': 'plain/text' or 'application/octet-stream'})
-                    content = json.loads(p.content.decode('utf-8'))
-                    if 'activation_key' in content:
-                        date = datetime.datetime.now() + datetime.timedelta(days=(12 * 30 * 1))
-                        set_param = request.env['ir.config_parameter'].sudo().set_param
-                        set_param('database.expiration_date', date)
-                        set_param('contract.validity',
-                                  base64.encodestring(
-                                      encrypt(json.dumps(str(date)),str(date))))
-                    if 'error_in_key' in content:
-                        return request.make_response(html_escape(json.dumps(error)))
-                    error['success'] = True
-                    error['message'] = '<h5>Your database successfully activated</h5>'
-                    return request.make_response(html_escape(json.dumps(error)))
-            except Exception as e:
-                error['code'] = 400
-                error['message'] = 'Flectra Error!'
-                return request.make_response(html_escape(json.dumps(error)))

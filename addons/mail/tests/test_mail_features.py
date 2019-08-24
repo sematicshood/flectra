@@ -24,6 +24,7 @@ class TestMailFeatures(TestMail):
         self.env['res.partner'].create({'name': 'Actual Partner'})
         self.assertTrue(record.name)
 
+
     @mute_logger('flectra.addons.mail.models.mail_mail')
     def test_needaction(self):
         # needaction use Inbox notification

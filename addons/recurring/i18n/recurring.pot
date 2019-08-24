@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Flectra Server 1.5\n"
+"Project-Id-Version: Flectra Server 1.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-26 12:03+0000\n"
-"PO-Revision-Date: 2019-03-26 12:03+0000\n"
+"POT-Creation-Date: 2018-08-01 17:11+0000\n"
+"PO-Revision-Date: 2018-08-01 17:11+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -48,7 +48,7 @@ msgid "Cron Job"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/tests/test_recurring.py:20
+#: code:addons/recurring/tests/test_recurring.py:21
 #, python-format
 msgid "Cron is not created"
 msgstr ""
@@ -92,12 +92,6 @@ msgid "Display Name"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/models/recurring.py:195
-#, python-format
-msgid "Document is already recurring"
-msgstr ""
-
-#. module: recurring
 #: model:ir.model.fields,field_description:recurring.field_recurring_doc_lines
 #: model:ir.ui.view,arch_db:recurring.view_recurring_form
 msgid "Documents created"
@@ -111,12 +105,6 @@ msgstr ""
 #. module: recurring
 #: selection:recurring,state:0
 msgid "Draft"
-msgstr ""
-
-#. module: recurring
-#: code:addons/recurring/models/recurring.py:85
-#, python-format
-msgid "Error! Source Document should be related to partner %s"
 msgstr ""
 
 #. module: recurring
@@ -251,7 +239,7 @@ msgid "Partner"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/models/recurring.py:244
+#: code:addons/recurring/models/recurring.py:221
 #, python-format
 msgid "Please provide another source document.\n"
 "This one does not exist!"
@@ -315,21 +303,15 @@ msgid "Recurring history"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/tests/test_recurring.py:30
+#: code:addons/recurring/tests/test_recurring.py:31
 #, python-format
 msgid "Recurring is in running state"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/tests/test_recurring.py:33
+#: code:addons/recurring/tests/test_recurring.py:34
 #, python-format
 msgid "Recurring is not in draft state"
-msgstr ""
-
-#. module: recurring
-#: code:addons/recurring/models/recurring.py:202
-#, python-format
-msgid "Recurring of the selected Source Document already exist"
 msgstr ""
 
 #. module: recurring
@@ -403,7 +385,7 @@ msgid "Weeks"
 msgstr ""
 
 #. module: recurring
-#: code:addons/recurring/models/recurring.py:270
+#: code:addons/recurring/models/recurring.py:247
 #, python-format
 msgid "You cannot delete an active recurring!"
 msgstr ""

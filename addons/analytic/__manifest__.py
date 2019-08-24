@@ -5,9 +5,9 @@
     'name' : 'Analytic Accounting',
     'author' : 'Odoo S.A',
     'version': '1.1',
-    'website' : 'https://flectrahq.com/accounting',
+    'website' : 'https://flectrahq.com/page/accounting',
     'category': 'Hidden/Dependency',
-    'depends' : ['base', 'decimal_precision', 'mail', 'base_branch_company'],
+    'depends' : ['base', 'decimal_precision', 'mail'],
     'description': """
 Module for defining analytic accounting object.
 ===============================================

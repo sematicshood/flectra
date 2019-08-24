@@ -165,4 +165,4 @@ class TestPurchaseOrder(AccountingTestCase):
         self.invoice.invoice_line_ids[0].quantity = 2.0
         self.invoice.invoice_line_ids[1].quantity = 2.0
         self.invoice.invoice_validate()
-        self.assertEqual(self.po.order_line.mapped('qty_invoiced'), [3.0, 3.0], 'Purchase: Billed quantity should be 3.0')
+        self.assertEqual(self.po.order_line.mapped('qty_invoiced'), [3.0, 3.0], 'Purchase: Billed quantity should be 3.0')        

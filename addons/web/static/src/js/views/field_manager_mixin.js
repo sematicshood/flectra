@@ -52,8 +52,6 @@ var FieldManagerMixin = {
                 if (event.data.force_save) {
                     return self.model.save(dataPointID).then(function () {
                         return self._confirmSave(dataPointID);
-                    }).fail(function () {
-                        return self._rejectSave(dataPointID);
                     });
                 } else if (options.notifyChange !== false) {
                     return self._confirmChange(dataPointID, result, event);
@@ -84,19 +82,6 @@ var FieldManagerMixin = {
      * @returns {Deferred}
      */
     _confirmSave: function (id) {
-        return $.when();
-    },
-    /**
-     * This method will be called whenever a save has been triggered by a change
-     * and has failed. For example, when a statusbar button is clicked in a
-     * readonly form view.
-     *
-     * @abstract
-     * @private
-     * @param {string} id The basicModel ID for the saved record
-     * @returns {Deferred}
-     */
-    _rejectSave: function (id) {
         return $.when();
     },
 
@@ -145,10 +130,8 @@ var FieldManagerMixin = {
         if ('offset' in data) {
             params.offset = data.offset;
         }
-        this.mutex.exec(function () {
-            return self.model.reload(data.id, params).then(function (db_id) {
-                data.on_success(self.model.get(db_id));
-            });
+        this.model.reload(data.id, params).then(function (db_id) {
+            data.on_success(self.model.get(db_id));
         });
     },
     /**

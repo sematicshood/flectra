@@ -2,7 +2,6 @@
 # Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
 
 from flectra import api, fields, models, _
-from flectra.tools import float_is_zero
 
 
 class PosMakePayment(models.TransientModel):
@@ -31,7 +30,7 @@ class PosMakePayment(models.TransientModel):
 
     session_id = fields.Many2one('pos.session', required=True, default=_default_session)
     journal_id = fields.Many2one('account.journal', string='Payment Mode', required=True, default=_default_journal)
-    amount = fields.Float(digits=0, required=True, default=_default_amount)
+    amount = fields.Float(digits=(16, 2), required=True, default=_default_amount)
     payment_name = fields.Char(string='Payment Reference')
     payment_date = fields.Date(string='Payment Date', required=True, default=lambda *a: fields.Datetime.now())
 
@@ -50,13 +49,11 @@ class PosMakePayment(models.TransientModel):
         """
         self.ensure_one()
         order = self.env['pos.order'].browse(self.env.context.get('active_id', False))
-        currency = order.pricelist_id.currency_id
         amount = order.amount_total - order.amount_paid
         data = self.read()[0]
         # add_payment expect a journal key
         data['journal'] = data['journal_id'][0]
-        data['amount'] = currency.round(data['amount']) if currency else data['amount']
-        if not float_is_zero(amount, precision_rounding=currency.rounding or 0.01):
+        if amount != 0.0:
             order.add_payment(data)
         if order.test_paid():
             order.action_pos_order_paid()

@@ -441,9 +441,7 @@ class GoogleCalendar(models.AbstractModel):
                 if google_attendee.get('found'):
                     continue
 
-                attendee = ResPartner.search([('email', '=ilike', google_attendee['email']), ('user_ids', '!=', False)], limit=1)
-                if not attendee:
-                    attendee = ResPartner.search([('email', '=ilike', google_attendee['email'])], limit=1)
+                attendee = ResPartner.search([('email', '=', google_attendee['email'])], limit=1)
                 if not attendee:
                     data = {
                         'email': partner_email,
@@ -903,7 +901,7 @@ class GoogleCalendar(models.AbstractModel):
         readonly = '.readonly' if RO else ''
         return 'https://www.googleapis.com/auth/calendar%s' % (readonly)
 
-    def authorize_google_uri(self, from_url='http://www.flectrahq.com'):
+    def authorize_google_uri(self, from_url='http://www.flectra.com'):
         url = self.env['google.service']._get_authorize_uri(from_url, self.STR_SERVICE, scope=self.get_calendar_scope())
         return url
 

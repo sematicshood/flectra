@@ -275,34 +275,15 @@ var SnippetOption = Widget.extend({
      */
     _setActive: function () {
         var self = this;
-        this.$el.find('[data-toggle-class]')
-            .addBack('[data-toggle-class]')
+        this.$el.find('[data-toggle-class], [data-select-class]')
+            .addBack('[data-toggle-class], [data-select-class]')
             .removeClass('active')
             .filter(function () {
-                var className = $(this).data('toggleClass');
-                return !className || self.$target.hasClass(className);
+                var $elem = $(this);
+                var className = $elem.data('toggleClass') || $elem.data('selectClass');
+                return self.$target.hasClass(className);
             })
             .addClass('active');
-
-        _processSelectClassElements(this.$el);
-
-        function _processSelectClassElements($el) {
-            var maxNbClasses = -1;
-            $el.find('[data-select-class]')
-                .addBack('[data-select-class]')
-                .removeClass('active')
-                .filter(function () {
-                    var className = $(this).data('selectClass');
-                    var nbClasses = className ? className.split(' ').length : 0;
-                    if (nbClasses >= maxNbClasses && (!className || self.$target.hasClass(className))) {
-                        maxNbClasses = nbClasses;
-                        return true;
-                    }
-                    return false;
-                })
-                .last()
-                .addClass('active');
-        }
     },
 
     //--------------------------------------------------------------------------
@@ -832,7 +813,6 @@ registry.colorpicker = SnippetOption.extend({
      */
     _onColorResetButtonClick: function () {
         this.$target.removeClass(this.classes);
-        this.$target.trigger('content_changed');
         this.$el.find('.colorpicker button.selected').removeClass('selected');
     },
 });
@@ -931,9 +911,7 @@ registry.background = SnippetOption.extend({
      */
     setTarget: function () {
         this._super.apply(this, arguments);
-        // TODO should be automatic for all options as equal to the start method
         this.bindBackgroundEvents();
-        this.__customImageSrc = this._getSrcFromCssValue();
     },
 
     //--------------------------------------------------------------------------

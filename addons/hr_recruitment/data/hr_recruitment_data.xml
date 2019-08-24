@@ -176,7 +176,9 @@
 
                     <h3 style="color:#9A6C8E;"><strong>Want to learn about us?</strong></h3>
                     <ol>
-                        <li><a style="color:#1CC5A9" href="https://flectrahq.com/blog/our-blog-1"></a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.flectra.com/blog/flectra-news-5/post/the-flectra-story-56">Founders' story</a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.slideshare.net/openobject/the-flectra-culture">The Flectra Culture</a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.flectra.com/page/about-us">About us</a></li>
                     </ol>
 
                     <hr style="margin: 30px 0"/>
@@ -227,7 +229,6 @@
                 <tbody>
                     <tr>
                         <td style="padding-top:10px;font-size: 12px;">
-                            <div>Sent by ${object.company_id.name}</div>
                             % if 'website_url' in object.job_id and object.job_id.website_url:
                             <div>
                                 Discover <a href="/jobs" style="text-decoration:none;color:#717188;">all our jobs</a>.
@@ -313,7 +314,9 @@
 
                     <h3 style="color:#9A6C8E;"><strong>Want to learn more?</strong></h3>
                     <ol>
-                        <li><a style="color:#1CC5A9" href="https://flectrahq.com/blog/our-blog-1"></a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.flectra.com/blog/flectra-news-5/post/the-flectra-story-56">Founders' story</a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.slideshare.net/openobject/the-flectra-culture">The Flectra Culture</a></li>
+                        <li><a style="color:#1CC5A9" href="https://www.flectra.com/page/about-us">About us</a></li>
                     </ol>
 
                     <hr style="margin: 30px 0"/>
@@ -364,7 +367,6 @@
                 <tbody>
                     <tr>
                         <td style="padding-top:10px;font-size: 12px;">
-                            <div>Sent by ${object.company_id.name}</div>
                             % if 'website_url' in object.job_id and object.job_id.website_url:
                             <div>
                                 Discover <a href="/jobs" style="text-decoration:none;color:#717188;">all our jobs</a>.

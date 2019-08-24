@@ -9,8 +9,8 @@
     'sequence': 60,
     'summary': 'Purchase Orders, Receipts, Vendor Bills',
     'description': "",
-    'website': 'https://flectrahq.com/purchase',
-    'depends': ['stock_account', 'base_branch_company'],
+    'website': 'https://flectrahq.com/page/purchase',
+    'depends': ['stock_account'],
     'data': [
         'security/purchase_security.xml',
         'security/ir.model.access.csv',

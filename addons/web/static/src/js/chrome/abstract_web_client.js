@@ -18,7 +18,6 @@ var config = require('web.config');
 var crash_manager = require('web.crash_manager');
 var data_manager = require('web.data_manager');
 var Dialog = require('web.Dialog');
-var KeyboardNavigationMixin = require('web.KeyboardNavigationMixin');
 var Loading = require('web.Loading');
 var mixins = require('web.mixins');
 var NotificationManager = require('web.notification').NotificationManager;
@@ -29,8 +28,7 @@ var Widget = require('web.Widget');
 var _t = core._t;
 var qweb = core.qweb;
 
-var AbstractWebClient = Widget.extend(mixins.ServiceProvider, KeyboardNavigationMixin, {
-    events: _.extend(KeyboardNavigationMixin.events, {}),
+var AbstractWebClient = Widget.extend(mixins.ServiceProvider, {
     custom_events: {
         clear_uncommitted_changes: function (e) {
             this.clear_uncommitted_changes().then(e.data.callback);
@@ -90,7 +88,6 @@ var AbstractWebClient = Widget.extend(mixins.ServiceProvider, KeyboardNavigation
     init: function (parent) {
         this.client_options = {};
         mixins.ServiceProvider.init.call(this);
-        KeyboardNavigationMixin.init.call(this);
         this._super(parent);
         this.origin = undefined;
         this._current_state = null;
@@ -158,13 +155,11 @@ var AbstractWebClient = Widget.extend(mixins.ServiceProvider, KeyboardNavigation
                 }
             }, 0);
         });
-        window.addEventListener('blur', function (e) { self._hideAccessKeyOverlay(); });
         core.bus.on('click', this, function (ev) {
             $('.tooltip').remove();
             if (!$(ev.target).is('input[type=file]')) {
                 self.$('.oe_dropdown_menu.oe_opened, .oe_dropdown_toggle.oe_opened').removeClass('oe_opened');
             }
-            this._hideAccessKeyOverlay();
         });
         core.bus.on('connection_lost', this, this.on_connection_lost);
         core.bus.on('connection_restored', this, this.on_connection_restored);

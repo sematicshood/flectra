@@ -9,7 +9,10 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     def _default_order_mail_template(self):
-        return self.env.ref('sale.email_template_edi_sale').id
+        if self.env['ir.module.module'].search([('name', '=', 'website_quote')]).state in ('installed', 'to upgrade'):
+            return self.env.ref('website_quote.confirmation_mail').id
+        else:
+            return self.env.ref('sale.email_template_edi_sale').id
 
     def _default_recovery_mail_template(self):
         try:
@@ -68,8 +71,6 @@ class ResConfigSettings(models.TransientModel):
 
         cart_recovery_mail_template = literal_eval(params.get_param('website_sale.cart_recovery_mail_template_id', default='False'))
         if cart_recovery_mail_template and not self.env['mail.template'].browse(cart_recovery_mail_template).exists():
-            cart_recovery_mail_template = self._default_recovery_mail_template()
-        else:
             cart_recovery_mail_template = self._default_recovery_mail_template()
 
         res.update(

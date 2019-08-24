@@ -26,8 +26,8 @@ class SaleOrder(models.Model):
     def _get_total_amount(self):
         for order_id in self:
             order_id.gross_amount = sum(
-                [order_id.pricelist_id.currency_id.round(line_id.product_uom_qty *
-                 line_id.price_unit) for line_id in order_id.order_line])
+                [line_id.product_uom_qty *
+                 line_id.price_unit for line_id in order_id.order_line])
 
     discount_method = fields.Selection(
         [('fixed', 'Fixed'), ('per', 'Percentage')], string="Discount Method")
@@ -54,10 +54,9 @@ class SaleOrder(models.Model):
                 discount_value_ratio = \
                     (self.discount_amount *
                      line.price_subtotal) / gross_amount
-                if discount_value_ratio:
-                    discount_per_ratio = \
-                        (discount_value_ratio * 100) / line.price_subtotal
-                    line.write({'discount': discount_per_ratio})
+                discount_per_ratio = \
+                    (discount_value_ratio * 100) / line.price_subtotal
+                line.write({'discount': discount_per_ratio})
 
     @api.onchange('discount_method')
     def onchange_discount_method(self):

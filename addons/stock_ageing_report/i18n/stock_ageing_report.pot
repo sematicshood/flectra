@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Flectra Server 1.5\n"
+"Project-Id-Version: Flectra Server 1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-26 12:03+0000\n"
-"PO-Revision-Date: 2019-03-26 12:03+0000\n"
+"POT-Creation-Date: 2018-05-15 11:07+0000\n"
+"PO-Revision-Date: 2018-05-15 11:07+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. module: stock_ageing_report
 #: model:ir.ui.view,arch_db:stock_ageing_report.stock_ageing_report_template
-msgid "<b>Branch: </b>"
+msgid "<b>Brnach: </b>"
 msgstr ""
 
 #. module: stock_ageing_report
@@ -169,12 +169,7 @@ msgstr ""
 
 #. module: stock_ageing_report
 #: model:ir.ui.view,arch_db:stock_ageing_report.stock_ageing_report_template
-msgid "Total Cost"
-msgstr ""
-
-#. module: stock_ageing_report
-#: model:ir.ui.view,arch_db:stock_ageing_report.stock_ageing_report_template
-msgid "Total Qty"
+msgid "Total"
 msgstr ""
 
 #. module: stock_ageing_report

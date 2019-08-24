@@ -28,8 +28,6 @@ __base="$(basename ${__file} .sh)"
 MOUNT_POINT="${__dir}/root_mount"
 OVERWRITE_FILES_BEFORE_INIT_DIR="${__dir}/overwrite_before_init"
 OVERWRITE_FILES_AFTER_INIT_DIR="${__dir}/overwrite_after_init"
-VERSION=11.0
-REPO=https://github.com/flectra-hq/flectra.git
 
 if [ ! -f kernel-qemu ] || ! file_exists *raspbian*.img ; then
     ./posbox_download_images.sh
@@ -37,21 +35,21 @@ fi
 
 cp -a *raspbian*.img posbox.img
 
-CLONE_DIR="${OVERWRITE_FILES_BEFORE_INIT_DIR}/home/pi/flectra"
+CLONE_DIR="${OVERWRITE_FILES_BEFORE_INIT_DIR}/home/pi/odoo"
 
 rm -rf "${CLONE_DIR}"
 
 if [ ! -d $CLONE_DIR ]; then
     echo "Clone Github repo"
     mkdir -p "${CLONE_DIR}"
-    git clone -b ${VERSION} --no-local --no-checkout --depth 1 ${REPO} "${CLONE_DIR}"
+    git clone -b 8.0 --no-local --no-checkout --depth 1 https://github.com/odoo/odoo.git "${CLONE_DIR}"
     cd "${CLONE_DIR}"
     git config core.sparsecheckout true
     echo "addons/web
 addons/hw_*
 addons/point_of_sale/tools/posbox/configuration
-flectra/
-flectra-bin" | tee --append .git/info/sparse-checkout > /dev/null
+openerp/
+odoo.py" | tee --append .git/info/sparse-checkout > /dev/null
     git read-tree -mu HEAD
 fi
 
@@ -91,7 +89,7 @@ sleep 5
 e2fsck -f "${LOOP_MAPPER_PATH}" # resize2fs requires clean fs
 resize2fs "${LOOP_MAPPER_PATH}"
 
-mkdir -p "${MOUNT_POINT}" #-p: no error if existing
+mkdir "${MOUNT_POINT}"
 mount "${LOOP_MAPPER_PATH}" "${MOUNT_POINT}"
 
 # 'overlay' the overwrite directory onto the mounted image filesystem
@@ -109,8 +107,7 @@ umount "${MOUNT_POINT}"
 
 # from http://paulscott.co.za/blog/full-raspberry-pi-raspbian-emulation-with-qemu/
 # ssh pi@localhost -p10022
-# as of stretch with newer kernels, the versatile-pb.dtb file is necessary
-QEMU_OPTS=(-kernel kernel-qemu -cpu arm1176 -m 256 -M versatilepb -dtb versatile-pb.dtb -no-reboot -serial stdio -append 'root=/dev/sda2 rootfstype=ext4 rw' -hda posbox.img -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::18069-:8069 -net nic)
+QEMU_OPTS=(-kernel kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append 'root=/dev/sda2 rootfstype=ext4 rw' -hda posbox.img -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::18069-:8069 -net nic)
 if [ -z ${DISPLAY:-} ] ; then
     QEMU_OPTS+=(-nographic)
 fi

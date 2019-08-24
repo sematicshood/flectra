@@ -65,7 +65,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">kanban,tree,form,calendar,pivot,graph</field>
             <field name="context">{
-                'default_group_by': 'stage_id',
+                'group_by': 'stage_id',
                 'search_default_project_id': [active_id],
                 'default_project_id': active_id,
             }</field>
@@ -333,9 +333,7 @@
                                     <a class="o_kanban_manage_toggle_button o_left" href="#" groups="project.group_project_manager"><i class="fa fa-ellipsis-v" /></a>
                                     <span class="o_right"><field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1" /></span>
                                 </div>
-                                 <div t-if="record.displayed_image_id.value">
-                                    <field name="displayed_image_id" widget="attachment_image"/>
-                                </div>
+
                                 <div class="o_project_kanban_boxes">
                                     <a class="o_project_kanban_box" name="%(act_project_project_2_project_task_all)d" type="action">
                                         <div>
@@ -750,7 +748,7 @@
             <field name="name">Project's tasks</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph,kanban</field>
-            <field name="domain">[('project_id', '=', active_id)]</field>
+            <field name="domain">[('project_id', 'child_of', [active_id])]</field>
             <field name="context">{'project_id':active_id}</field>
         </record>
 

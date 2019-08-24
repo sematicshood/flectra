@@ -26,7 +26,7 @@ This module manages:
     """,
     'category': 'Accounting',
     'sequence': 20,
-    'website' : 'https://flectrahq.com/accounting',
+    'website' : 'https://flectrahq.com/page/billing',
     'depends' : ['account'],
     'demo' : [],
     'data' : [

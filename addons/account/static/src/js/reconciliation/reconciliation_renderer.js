@@ -42,7 +42,6 @@ var StatementRenderer = Widget.extend(FieldManagerMixin, {
         var defs = [this._super.apply(this, arguments)];
         this.time = Date.now();
         this.$progress = this.$('.progress');
-        this.clickStatementName = this._initialState.bank_statement_id ? true : false;
 
         if (this._initialState.bank_statement_id) {
             var def = this.model.makeRecord("account.bank.statement", [{
@@ -173,9 +172,7 @@ var StatementRenderer = Widget.extend(FieldManagerMixin, {
      * @private
      */
     _onClickStatementName: function () {
-        if (this.clickStatementName) {
-            this.$('.statement_name, .statement_name_edition').toggle();
-        }
+        this.$('.statement_name, .statement_name_edition').toggle();
     },
     /**
      * @private
@@ -295,12 +292,8 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             self.fields = {
                 partner_id : new relational_fields.FieldMany2One(self,
                     'partner_id',
-                    self.model.get(recordID), {
-                        mode: 'edit',
-                        attrs: {
-                            placeholder: self._initialState.st_line.communication_partner_name || '',
-                        }
-                    }
+                    self.model.get(recordID),
+                    {mode: 'edit'}
                 )
             };
             self.fields.partner_id.appendTo(self.$('.accounting_view caption'));
@@ -389,10 +382,10 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
                     .attr("data-content", qweb.render('reconciliation.line.mv_line.details', {'line': line}));
             }
             if (line.already_paid === false &&
-                (((state.balance.amount_currency < 0 || line.partial_reconcile)
+                ((state.balance.amount_currency < 0 || line.partial_reconcile)
                     && line.amount > 0 && state.st_line.amount > 0 && targetLineAmount < line.amount && partialDebitProps <= 1) ||
                 ((state.balance.amount_currency > 0 || line.partial_reconcile)
-                    && line.amount < 0 && state.st_line.amount < 0 && targetLineAmount > line.amount && partialCreditProps <= 1))) {
+                    && line.amount < 0 && state.st_line.amount < 0 && targetLineAmount > line.amount && partialCreditProps <= 1)) {
                 var $cell = $line.find(line.amount > 0 ? '.cell_right' : '.cell_left');
                 var text;
                 if (line.partial_reconcile) {
@@ -413,8 +406,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
 
         // mv_lines
         var $mv_lines = this.$('.match table tbody').empty();
-        var stateMvLines = state.mv_lines || [];
-        _.each(stateMvLines.slice(0, state.limitMoveLines), function (line) {
+        _.each(state.mv_lines.slice(0, state.limitMoveLines), function (line) {
             var $line = $(qweb.render("reconciliation.line.mv_line", {'line': line, 'state': state}));
             if (!isNaN(line.id)) {
                 $('<span class="line_info_button fa fa-info-circle"/>')
@@ -423,9 +415,9 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             }
             $mv_lines.append($line);
         });
-        this.$('.match .fa-chevron-right').toggleClass('disabled', stateMvLines.length <= state.limitMoveLines);
+        this.$('.match .fa-chevron-right').toggleClass('disabled', state.mv_lines.length <= state.limitMoveLines);
         this.$('.match .fa-chevron-left').toggleClass('disabled', !state.offset);
-        this.$('.match').css('max-height', !stateMvLines.length && !state.filter.length ? '0px' : '');
+        this.$('.match').css('max-height', !state.mv_lines.length && !state.filter.length ? '0px' : '');
 
         // balance
         this.$('.popover').remove();
@@ -487,7 +479,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
         }
         return this.model.makeRecord('account.bank.statement.line', [field], {
             partner_id: {
-                domain: ["|", ["is_company", "=", true], ["parent_id", "=", false], "|", ["customer", "=", true], ["supplier", "=", true]],
+                domain: [["parent_id", "=", false], "|", ["customer", "=", true], ["supplier", "=", true]],
                 options: {
                     no_open: true
                 }
@@ -526,10 +518,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             type: 'float',
             name: 'amount',
         }], {
-            account_id: {
-                string: _t("Account"),
-                domain: [['deprecated', '=', false]],
-            },
+            account_id: {string: _t("Account")},
             label: {string: _t("Label")},
             amount: {string: _t("Account")}
         }).then(function (recordID) {
