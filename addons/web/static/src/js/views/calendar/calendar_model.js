@@ -58,10 +58,11 @@ return AbstractModel.extend({
             end.add(-1, 'days');
         }
 
+        var isDateEvent = this.fields[this.mapping.date_start].type === 'date';
         // An "allDay" event without the "all_day" option is not considered
         // as a 24h day. It's just a part of the day (by default: 7h-19h).
         if (event.allDay) {
-            if (!this.mapping.all_day) {
+            if (!this.mapping.all_day && !isDateEvent) {
                 if (event.r_start) {
                     start.hours(event.r_start.hours())
                          .minutes(event.r_start.minutes())
@@ -73,9 +74,11 @@ return AbstractModel.extend({
                        .utc();
                 } else {
                     // default hours in the user's timezone
-                    start.hours(7).add(-this.getSession().getTZOffset(start), 'minutes');
-                    end.hours(19).add(-this.getSession().getTZOffset(end), 'minutes');
+                    start.hours(7);
+                    end.hours(19);
                 }
+                start.add(-this.getSession().getTZOffset(start), 'minutes');
+                end.add(-this.getSession().getTZOffset(end), 'minutes');
             }
         } else {
             start.add(-this.getSession().getTZOffset(start), 'minutes');
@@ -236,16 +239,17 @@ return AbstractModel.extend({
         this.setDate(this.data.target_date.clone().add(-1, this.data.scale));
     },
     /**
-     * @todo: this should not work. it ignores the domain/context
-     *
      * @override
-     * @param {any} _handle ignored
-     * @param {any} _params ignored ? really ?
+     * @param {Object} [params.context]
+     * @param {Array} [params.domain]
      * @returns {Deferred}
      */
-    reload: function (_handle, params) {
+    reload: function (handle, params) {
         if (params.domain) {
             this.data.domain = params.domain;
+        }
+        if (params.context) {
+            this.data.context = params.context;
         }
         return this._loadCalendar();
     },
@@ -390,6 +394,7 @@ return AbstractModel.extend({
             dayNames: moment.weekdays(),
             dayNamesShort: moment.weekdaysShort(),
             firstDay: moment()._locale._week.dow,
+            slotLabelFormat: _t.database.parameters.time_format.search("%H") != -1 ? 'H:mm': 'h(:mm)a',
         };
     },
     /**
