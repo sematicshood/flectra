@@ -4,10 +4,10 @@
 {
     'name': 'Multi Company Base',
     'summary': 'Provides a base for adding multi-company support to models.',
-    'version': '1.0.1.0.0',
+    'version': '11.0.1.0.0',
     'author': "LasLabs, Tecnativa, Odoo Community Association (OCA)",
     'category': 'base',
-    'website': 'https://gitlab.com/flectra-community/multi-company',
+    'website': 'https://laslabs.com',
     'license': 'LGPL-3',
     'installable': True,
     'application': False,

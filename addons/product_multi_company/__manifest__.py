@@ -7,9 +7,9 @@
                "company",
     'author': "Tecnativa,"
               "Odoo Community Association (OCA)",
-    'website': "https://gitlab.com/flectra-community/multi-company",
+    'website': "https://www.tecnativa.com",
     'category': 'Product Management',
-    'version': '1.0.1.0.0',
+    'version': '11.0.1.0.0',
     'license': 'AGPL-3',
     'depends': [
         'base_multi_company',
