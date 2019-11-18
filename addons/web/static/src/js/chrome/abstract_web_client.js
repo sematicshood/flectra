@@ -96,7 +96,7 @@ var AbstractWebClient = Widget.extend(mixins.ServiceProvider, KeyboardNavigation
         this._current_state = null;
         this.menu_dm = new concurrency.DropMisordered();
         this.action_mutex = new concurrency.Mutex();
-        this.set('title_part', {"zopenerp": "Flectra"});
+        this.set('title_part', {"zopenerp": "Sematics"});
     },
     start: function () {
         var self = this;
