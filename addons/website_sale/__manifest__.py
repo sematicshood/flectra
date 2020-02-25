@@ -1,11 +1,10 @@
 {
     'name': 'eCommerce',
-    'author': 'Odoo S.A.',
     'category': 'Website',
     'sequence': 55,
     'summary': 'Sell Your Products Online',
-    'website': 'https://flectrahq.com/page/e-commerce',
-    'version': '1.1',
+    'website': 'https://www.flectrahq.com/page/e-commerce',
+    'version': '1.0',
     'description': "",
     'depends': ['website', 'sale_payment', 'website_payment', 'website_mail', 'website_form', 'website_rating'],
     'data': [

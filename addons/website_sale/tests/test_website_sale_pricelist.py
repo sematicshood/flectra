@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
+# Part of Odoo,Flectra. See LICENSE file for full copyright and licensing details.
 try:
     from unittest.mock import patch
 except ImportError:
@@ -8,6 +8,7 @@ from flectra.tests.common import TransactionCase
 
 
 class TestWebsitePriceList(TransactionCase):
+
     # Mock nedded because request.session doesn't exist during test
     def _get_pricelist_available(self, show_visible=False):
         return self.get_pl(self.args.get('show'), self.args.get('current_pl'), self.args.get('country'))
@@ -18,27 +19,34 @@ class TestWebsitePriceList(TransactionCase):
         self.website = self.env['website'].browse(1)
         self.website.user_id = self.env.user
 
-        self.env['product.pricelist'].search([]).write({'website_ids': []})
+        self.env['product.pricelist'].search([]).write({'website_id': False})
         website_pls = ('list_benelux', 'list_christmas', 'list_europe')
         for pl in website_pls:
-            self.env.ref('website_sale.' + pl).website_ids = [(6, 0, [self.website.id])]
-        self.env.ref('product.list0').website_ids = [(6, 0, [self.website.id])]
-        self.env.ref('website_sale.list_benelux').selectable = True
+            self.env['website.product.pricelist'].create({
+                'pricelist_id': self.env.ref('website_sale.' + pl).id,
+                'website_id': self.website.id,
+                'selectable': False if pl == 'list_christmas' else True
+            })
+        self.env['website.product.pricelist'].create({
+            'pricelist_id': self.env.ref('product.list0').id,
+            'website_id': self.website.id
+        })
         self.website.pricelist_id = self.ref('product.list0')
 
         ca_group = self.env['res.country.group'].create({
             'name': 'Canada',
             'country_ids': [(6, 0, [self.ref('base.ca')])]
         })
-        self.env['product.pricelist'].create({
+        ppl = self.env['product.pricelist'].create({
             'name': 'Canada',
-            'selectable': True,
-            'website_ids': [(6, 0, [self.website.id])],
             'country_group_ids': [(6, 0, [ca_group.id])],
             'sequence': 10
         })
-        patcher = patch('flectra.addons.website_sale.models.website.Website.get_pricelist_available',
-                        wraps=self._get_pricelist_available)
+        self.env['website.product.pricelist'].create({
+            'pricelist_id': ppl.id,
+            'website_id': self.website.id
+        })
+        patcher = patch('flectra.addons.website_sale.models.website.Website.get_pricelist_available', wraps=self._get_pricelist_available)
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -57,16 +65,15 @@ class TestWebsitePriceList(TransactionCase):
         current_pl = False
 
         country_list = {
-            False: ['Public Pricelist', 'EUR', 'Benelux', 'Canada'],
+            False: ['USD', 'EUR', 'Benelux', 'Canada'],
             'BE': ['EUR', 'Benelux'],
             'IT': ['EUR'],
             'CA': ['Canada'],
-            'US': ['Public Pricelist', 'EUR', 'Benelux', 'Canada']
+            'US': ['USD', 'EUR', 'Benelux', 'Canada']
         }
         for country, result in country_list.items():
             pls = self.get_pl(show, current_pl, country)
-            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls),
-                              'Test failed for %s (%s %s vs %s %s)'
+            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
 
     def _test_get_pricelist_available_not_show(self):
@@ -74,17 +81,16 @@ class TestWebsitePriceList(TransactionCase):
         current_pl = False
 
         country_list = {
-            False: ['Public Pricelist', 'EUR', 'Benelux', 'Christmas', 'Canada'],
+            False: ['USD', 'EUR', 'Benelux', 'Christmas', 'Canada'],
             'BE': ['EUR', 'Benelux', 'Christmas'],
             'IT': ['EUR', 'Christmas'],
-            'US': ['Public Pricelist', 'EUR', 'Benelux', 'Christmas', 'Canada'],
+            'US': ['USD', 'EUR', 'Benelux', 'Christmas', 'Canada'],
             'CA': ['Canada']
         }
 
         for country, result in country_list.items():
             pls = self.get_pl(show, current_pl, country)
-            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls),
-                              'Test failed for %s (%s %s vs %s %s)'
+            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
 
     def _test_get_pricelist_available_promocode(self):
@@ -116,17 +122,15 @@ class TestWebsitePriceList(TransactionCase):
         show = True
         self.env.user.partner_id.country_id = self.env.ref('base.be')  # Add EUR pricelist auto
         current_pl = False
+
         country_list = {
-            False: ['Public Pricelist', 'EUR', 'Benelux', 'Canada'],
+            False: ['USD', 'EUR', 'Benelux', 'Canada'],
             'BE': ['EUR', 'Benelux'],
-            'IT': ['Benelux', 'Public Pricelist', 'Canada'],  # 'IT': ['Benelux', 'USD', 'Canada']
+            'IT': ['EUR'],
             'CA': ['EUR', 'Canada'],
-            'US': ['Public Pricelist', 'EUR', 'Benelux', 'Canada']
+            'US': ['USD', 'EUR', 'Benelux', 'Canada']
         }
         for country, result in country_list.items():
             pls = self.get_pl(show, current_pl, country)
-            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls),
-                              'Test failed for %s (%s %s vs %s %s)'
+            self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
-
-

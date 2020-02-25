@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
+# Part of Odoo,Flectra. See LICENSE file for full copyright and licensing details.
 import json
 import logging
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import Forbidden
 
 from flectra import http, tools, _
 from flectra.http import request
@@ -10,9 +10,7 @@ from flectra.addons.base.ir.ir_qweb.fields import nl2br
 from flectra.addons.http_routing.models.ir_http import slug
 from flectra.addons.website.controllers.main import QueryURL
 from flectra.exceptions import ValidationError
-from flectra.addons.website.controllers.main import Website
 from flectra.addons.website_form.controllers.main import WebsiteForm
-from flectra.osv import expression
 
 _logger = logging.getLogger(__name__)
 
@@ -123,19 +121,7 @@ class WebsiteSaleForm(WebsiteForm):
         return json.dumps({'id': order.id})
 
 
-class Website(Website):
-    @http.route()
-    def get_switchable_related_views(self, key):
-        views = super(Website, self).get_switchable_related_views(key)
-        if key == 'website_sale.product':
-            if not request.env.user.has_group('product.group_product_variant'):
-                view_product_variants = request.env.ref('website_sale.product_variants')
-                views[:] = [v for v in views if v['id'] != view_product_variants.id]
-        return views
-
-
 class WebsiteSale(http.Controller):
-
     def _get_compute_currency_and_context(self):
         pricelist_context = dict(request.env.context)
         pricelist = False
@@ -154,7 +140,7 @@ class WebsiteSale(http.Controller):
     def get_attribute_value_ids(self, product):
         """ list of selectable attributes of a product
 
-        :return: list of product variant description
+        :return: list of product variant description as requested website
            (variant id, [visible attribute ids], variant price, variant sale price)
         """
         # product attributes with at least two choices
@@ -170,7 +156,7 @@ class WebsiteSale(http.Controller):
             else:
                 price = variant.website_public_price / quantity
             visible_attribute_ids = [v.id for v in variant.attribute_value_ids if v.attribute_id.id in visible_attrs_ids]
-            attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price / quantity, price])
+            attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price])
         return attribute_value_ids
 
     def _get_search_order(self, post):
@@ -231,11 +217,6 @@ class WebsiteSale(http.Controller):
         else:
             ppg = PPG
 
-        if category:
-            category = request.env['product.public.category'].search([('id', '=', int(category))], limit=1)
-            if not category:
-                raise NotFound()
-
         attrib_list = request.httprequest.args.getlist('attrib')
         attrib_values = [[int(x) for x in v.split("-")] for v in attrib_list if v]
         attributes_ids = {v[0] for v in attrib_values}
@@ -264,58 +245,25 @@ class WebsiteSale(http.Controller):
             post["search"] = search
         if category:
             category = request.env['product.public.category'].browse(int(category))
-            if not category.website_ids or \
-               request.website.id not in category.website_ids.ids:
+            website = []
+            for web in category.website_ids:
+                website.append(web.id)
+            if request.website.id not in website:
                 return request.render('website.404')
             url = "/shop/category/%s" % slug(category)
         if attrib_list:
             post['attrib'] = attrib_list
 
-        current_partner_tags = request.context['partner'].category_id
-        partner_child_tags = request.env['res.partner.category'].search(
-            [('parent_id', 'in', current_partner_tags.ids)])
-
-        if not request.env.user.has_group('website.group_website_publisher'):
-            categs = request.env['product.public.category'].search(
-                [('parent_id', '=', False),
-                 ('website_ids', 'in', request.website.id),
-                 '|', ('partner_tag_ids', 'in',
-                       current_partner_tags.ids + partner_child_tags.ids),
-                 ('partner_tag_ids', '=', False)])
-        else:
-            categs = request.env['product.public.category'].search(
-                [('parent_id', '=', False),
-                 ('website_ids', 'in', request.website.id)])
-
-        categs_with_childs = request.env['product.public.category'].search(
-            [('website_ids', 'in', request.website.id),
-             '|', ('partner_tag_ids', 'in',
-                   current_partner_tags.ids + partner_child_tags.ids),
-             ('partner_tag_ids', '=', False)])
-
-        parent_categ_with_childs = request.env['product.public.category'].\
-            search([('parent_id', 'in', categs_with_childs.ids),
-                    '|', ('partner_tag_ids', 'in',
-                          current_partner_tags.ids + partner_child_tags.ids),
-                    ('partner_tag_ids', '=', False)])
-
+        categs = request.env['product.public.category'].search([('parent_id', '=', False), ('website_ids', 'in', request.website.id)])
         Product = request.env['product.template']
 
         parent_category_ids = []
         if category:
-            url = "/shop/category/%s" % slug(category)
             parent_category_ids = [category.id]
             current_category = category
             while current_category.parent_id:
                 parent_category_ids.append(current_category.parent_id.id)
                 current_category = current_category.parent_id
-
-        if not request.env.user.has_group('website.group_website_publisher') \
-                and (categs_with_childs or parent_categ_with_childs):
-            domain += ['|', '|',
-                       ('public_categ_ids', 'in', categs_with_childs.ids),
-                       ('public_categ_ids', 'in', parent_categ_with_childs.ids),
-                       ('public_categ_ids', '=', False)]
 
         product_count = Product.search_count(domain)
         pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
@@ -325,9 +273,7 @@ class WebsiteSale(http.Controller):
         ProductBrand = request.env['product.brand']
         ProductTag = request.env['product.tags']
         if products:
-            # get all products without limit
-            selected_products = Product.search(domain, limit=False)
-            attributes = ProductAttribute.search([('attribute_line_ids.product_tmpl_id', 'in', selected_products.ids)])
+            attributes = ProductAttribute.search([('attribute_line_ids.product_tmpl_id', 'in', products.ids)])
             prod_brands = []
             prod_tags = []
             for product in products:
@@ -344,6 +290,7 @@ class WebsiteSale(http.Controller):
             tags = ProductTag.browse(tag_set)
 
         limits = request.env['product.view.limit'].search([])
+
         values = {
             'search': search,
             'category': category,
@@ -358,8 +305,6 @@ class WebsiteSale(http.Controller):
             'bins': TableCompute().process(products, ppg),
             'rows': PPR,
             'categories': categs,
-            'categories_with_child': categs_with_childs.ids +
-            parent_categ_with_childs.ids,
             'attributes': attributes,
             'compute_currency': compute_currency,
             'keep': keep,
@@ -368,17 +313,13 @@ class WebsiteSale(http.Controller):
             'get_attribute_value_ids': self.get_attribute_value_ids,
             'tags': tags,
             'brands': brands,
-            'PPG': PPG,
         }
         if category:
             values['main_object'] = category
-        return request.render("website_sale.main_shop_page", values)
+        return request.render("website_sale.products", values)
 
     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
     def product(self, product, category='', search='', **kwargs):
-        if not request.env.user.has_group('website.group_website_publisher') \
-                and request.website.id not in product.website_ids.ids:
-            return request.render('website.404')
         product_context = dict(request.env.context,
                                active_id=product.id,
                                partner=request.env.user.partner_id)
@@ -405,6 +346,7 @@ class WebsiteSale(http.Controller):
             product_context['pricelist'] = pricelist.id
             product = product.with_context(product_context)
 
+
         values = {
             'search': search,
             'category': category,
@@ -422,7 +364,7 @@ class WebsiteSale(http.Controller):
 
     @http.route(['/shop/change_pricelist/<model("product.pricelist"):pl_id>'], type='http', auth="public", website=True)
     def pricelist_change(self, pl_id, **post):
-        if (pl_id.selectable or pl_id == request.env.user.partner_id.property_product_pricelist) \
+        if (pl_id.website_id or pl_id == request.env.user.partner_id.property_product_pricelist) \
                 and request.website.is_pricelist_available(pl_id.id):
             request.session['website_sale_current_pl'] = pl_id.id
             request.website.sale_get_order(force_pricelist=pl_id.id)
@@ -847,18 +789,16 @@ class WebsiteSale(http.Controller):
             bootstrap_formatting= True
         )
 
-        domain = expression.AND([
-            ['&', ('website_published', '=', True), ('company_id', '=', order.company_id.id)],
-            ['|', ('specific_countries', '=', False), ('country_ids', 'in', [order.partner_id.country_id.id])]
-        ])
-        acquirers = request.env['payment.acquirer'].search(domain)
+        acquirers = request.env['payment.acquirer'].search(
+            [('website_published', '=', True), ('company_id', '=', order.company_id.id)]
+        )
 
         values['access_token'] = order.access_token
         values['form_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 'form' and acq.view_template_id]
         values['s2s_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 's2s' and acq.registration_view_template_id]
         values['tokens'] = request.env['payment.token'].search(
             [('partner_id', '=', order.partner_id.id),
-            ('acquirer_id', 'in', acquirers.ids)])
+            ('acquirer_id', 'in', [acq.id for acq in values['s2s_acquirers']])])
 
         for acq in values['form_acquirers']:
             acq.form = acq.with_context(submit_class='btn btn-primary', submit_txt=_('Pay Now')).sudo().render(
@@ -967,11 +907,9 @@ class WebsiteSale(http.Controller):
         # we proceed the s2s payment
         res = tx.confirm_sale_token()
         # we then redirect to the page that validates the payment by giving it error if there's one
-        if tx.state != 'authorized' or not tx.acquirer_id.capture_manually:
-            if res is not True:
-                return request.redirect('/shop/payment/validate?success=False&error=%s' % res)
-            return request.redirect('/shop/payment/validate?success=True')
-        return request.redirect('/shop/payment/validate')
+        if res is not True:
+            return request.redirect('/shop/payment/validate?success=False&error=%s' % res)
+        return request.redirect('/shop/payment/validate?success=True')
 
     @http.route('/shop/payment/get_status/<int:sale_order_id>', type='json', auth="public", website=True)
     def payment_get_status(self, sale_order_id, **post):

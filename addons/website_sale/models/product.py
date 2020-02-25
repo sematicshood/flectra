@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
+# Part of Odoo,Flectra. See LICENSE file for full copyright and licensing details.
 from flectra import api, fields, models, tools, _
 from flectra.addons import decimal_precision as dp
 
@@ -10,11 +10,10 @@ from flectra.tools import float_is_zero
 
 class ProductTags(models.Model):
     _name = 'product.tags'
-    _description = 'Product Tags'
     _order = 'sequence'
 
     sequence = fields.Integer(help="Gives the sequence order when "
-                                   "displaying a list of tags.")
+                                   "displaying a list of rules.")
     name = fields.Char(string='Name', required=True, translate=True)
 
     _sql_constraints = [('name_uniq', 'unique (name)',
@@ -27,7 +26,7 @@ class ProductBrand(models.Model):
     _order = 'sequence'
 
     sequence = fields.Integer(help="Gives the sequence order when displaying "
-                                   "a list of brands.")
+                                   "a list of rules.")
     name = fields.Char(string='Name', required=True, translate=True)
     brand_image = fields.Binary(string='Brand Image')
 
@@ -37,7 +36,7 @@ class ProductBrand(models.Model):
 
 class ProductRibbon(models.Model):
     _name = 'product.ribbon'
-    _description = 'Product Ribbon'
+    _description = 'Product Brand'
     _order = 'name'
 
     name = fields.Char(string='Name', size=20, required=True, translate=True)
@@ -45,31 +44,30 @@ class ProductRibbon(models.Model):
     ribbon_color_text = fields.Char(string='Font Color', required=True)
 
 
-class ProductViewLimit(models.Model):
-    _name = 'product.view.limit'
-    _order = 'sequence'
+class ProductStyle(models.Model):
+    _name = "product.style"
 
-    sequence = fields.Integer(help="Gives the sequence order when "
-                                   "displaying a list of rules.")
-    name = fields.Integer(string='Limit', required=True)
+    name = fields.Char(string='Style Name', required=True)
+    html_class = fields.Char(string='HTML Classes')
 
-    _sql_constraints = [('name', 'unique(name)', 'This must be unique!')]
+
+class WebsitePriceList(models.Model):
+    _name = "website.product.pricelist"
+
+    pricelist_id = fields.Many2one('product.pricelist',
+                                   string='Website Pricelist')
+    website_id = fields.Many2one('website', string='Website')
+    selectable = fields.Boolean(string="selectable", default=True)
 
 
 class ProductPricelist(models.Model):
     _inherit = "product.pricelist"
 
     def _default_website(self):
-        default_website_id = self.env.ref('website.default_website')
-        return [default_website_id.id] if default_website_id else None
+        return self.env['website'].search([], limit=1)
 
-    website_ids = fields.Many2many('website', 'website_pricelist_rule_rel',
-                                   'pricelist_id', 'website_id',
-                                   string="website", default=_default_website,
-                                   help='List of websites in which price-list '
-                                        'will published.')
+    website_id = fields.One2many('website.product.pricelist', 'pricelist_id', string='Website')
     code = fields.Char(string='E-commerce Promotional Code', groups="base.group_user")
-    selectable = fields.Boolean(help="Allow the end user to choose this price list")
 
     def clear_cache(self):
         # website._get_pl() is cached to avoid to recompute at each request the
@@ -97,15 +95,23 @@ class ProductPricelist(models.Model):
         return res
 
 
+class WebsiteProductLimit(models.Model):
+    _name = 'product.view.limit'
+    _order = 'sequence'
+
+    sequence = fields.Integer(help="Gives the sequence order when "
+                                   "displaying a list of rules.")
+    name = fields.Integer(string='Limit', required=True)
+
+    _sql_constraints = [('name', 'unique(name)', 'This must be unique!')]
+
+
+
 class ProductPublicCategory(models.Model):
     _name = "product.public.category"
     _inherit = ["website.seo.metadata"]
     _description = "Website Product Category"
     _order = "sequence, name"
-
-    def _default_website(self):
-        default_website_id = self.env.ref('website.default_website')
-        return [default_website_id.id] if default_website_id else None
 
     name = fields.Char(required=True, translate=True)
     parent_id = fields.Many2one('product.public.category', string='Parent Category', index=True)
@@ -127,28 +133,15 @@ class ProductPublicCategory(models.Model):
                                 "Use this field anywhere a small image is required.")
     website_ids = fields.Many2many('website', 'website_prod_public_categ_rel',
                                    'website_id', 'category_id',
-                                   default=_default_website,
                                    string='Websites', copy=False,
                                    help='List of websites in which '
-                                        'category will published.')
-    partner_tag_ids = fields.Many2many('res.partner.category',
-                                       'partner_public_categ_tags_rel',
-                                       'tag_id', 'category_id',
-                                       string='Partner Tags',
-                                       help='If logged in customers/partners '
-                                            'have this tag then this product '
-                                            'category will appear to them in '
-                                            'E-commerce website.\n\n'
-                                            'If empty then it becomes general '
-                                            'category which display to any '
-                                            'customers/partners.')
+                                        'category is published.')
 
     @api.model
     def create(self, vals):
         tools.image_resize_images(vals)
         res = super(ProductPublicCategory, self).create(vals)
-        # @todo Flectra:
-        # Multi-Website: Check different test-cases for child & parent category
+        # @todo Check different test-case: child & parent category
         if res.parent_id:
             res.parent_id.write({
                 'website_ids': [(4, website_id.id) for website_id in res.website_ids]
@@ -159,8 +152,7 @@ class ProductPublicCategory(models.Model):
     def write(self, vals):
         tools.image_resize_images(vals)
         res = super(ProductPublicCategory, self).write(vals)
-        # @todo Flectra:
-        # Multi-Website: Check different test-cases for child & parent category
+        # @todo Check different test-case: child & parent category
         if self.parent_id and self.website_ids.ids:
             self.parent_id.write({
                 'website_ids': [(4, website_id.id) for website_id in self.website_ids]
@@ -198,10 +190,6 @@ class ProductTemplate(models.Model):
     _name = 'product.template'
     _mail_post_access = 'read'
 
-    def _default_website(self):
-        default_website_id = self.env.ref('website.default_website')
-        return [default_website_id.id] if default_website_id else None
-
     website_description = fields.Html('Description for the website', sanitize_attributes=False, translate=html_translate)
     alternative_product_ids = fields.Many2many('product.template', 'product_alternative_rel', 'src_id', 'dest_id',
                                                string='Alternative Products', help='Suggest more expensive alternatives to '
@@ -226,12 +214,11 @@ class ProductTemplate(models.Model):
     website_ids = fields.Many2many('website', 'website_prod_pub_rel',
                                    'website_id', 'product_id',
                                    string='Websites', copy=False,
-                                   default=_default_website,
                                    help='List of websites in which '
-                                        'Product will published.')
-    ribbon_id = fields.Many2one('product.ribbon', string="Product Ribbon")
-    brand_id = fields.Many2one('product.brand', string="Product Brand")
-    tag_ids = fields.Many2many('product.tags', string="Product Tags")
+                                        'Product is published.')
+    ribbon_id = fields.Many2one('product.ribbon', string='Product Ribbon')
+    brand_id = fields.Many2one('product.brand', string="Product's Brand")
+    tag_ids = fields.Many2many('product.tags', string='Product Tags')
 
     def _website_price(self):
         # First filter out the ones that have no variant:
@@ -280,6 +267,11 @@ class ProductTemplate(models.Model):
 class Product(models.Model):
     _inherit = "product.product"
 
+    def _get_default_website_ids(self):
+        default_website_id = self.env.ref('website.default_website')
+        return [default_website_id.id] if default_website_id else None
+
+    website_ids = fields.Many2many('website', string="Publish Product On Website", default=_get_default_website_ids)
     website_price = fields.Float('Website price', compute='_website_price', digits=dp.get_precision('Product Price'))
     website_public_price = fields.Float('Website public price', compute='_website_price', digits=dp.get_precision('Product Price'))
     website_price_difference = fields.Boolean('Website price difference', compute='_website_price')

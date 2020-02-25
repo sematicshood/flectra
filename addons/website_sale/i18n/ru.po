@@ -3,11 +3,11 @@
 # * website_sale
 # 
 # Translators:
-# Collex100, 2017
-# Sergey Vilizhanin <sv@grimmette.ru>, 2017
+# Эдуард Манятовский <manyatovskiy@gmail.com>, 2017
+# SV <sv@grimmette.ru>, 2017
 # Viktor Pogrebniak <vp@aifil.ru>, 2017
 # Максим Дронь <dronmax@gmail.com>, 2017
-# Martin Trigaux, 2017
+# Martin Trigaux <mat@odoo.com>, 2017
 # Masha Koc <mariya.kos.ua@gmail.com>, 2017
 # Vladimir Lukianov <lvm.mobile@gmail.com>, 2017
 # OstapYakovenko <Ostap.Yakovenko@gmail.com>, 2017
@@ -16,15 +16,13 @@
 # Denis Baranov <baranov@itlibertas.com>, 2017
 # Gennady Marchenko <gennadym@gmail.com>, 2017
 # Evgeny <transingularity@gmail.com>, 2017
-# Dmitry sky <d.v.selitsky@gmail.com>, 2017
-# Yuriy Ney <k_wizard@mail.ru>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 11.0\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-19 13:43+0000\n"
-"PO-Revision-Date: 2018-02-19 13:43+0000\n"
-"Last-Translator: Yuriy Ney <k_wizard@mail.ru>, 2018\n"
+"POT-Creation-Date: 2017-10-02 11:26+0000\n"
+"PO-Revision-Date: 2017-10-02 11:26+0000\n"
+"Last-Translator: Evgeny <transingularity@gmail.com>, 2017\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,7 +36,7 @@ msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: website_sale
-#: model:ir.ui.view,arch_db:website_sale.cart_lines
+#: model:ir.ui.view,arch_db:website_sale.reduction_code
 msgid "/shop/cart"
 msgstr ""
 
@@ -776,9 +774,6 @@ msgid ""
 "A rounding per line is advised if your prices are tax-included. That way, "
 "the sum of line subtotals equals the total with taxes."
 msgstr ""
-"Округление по строкам рекомендуется использовать, если ваши цены включают "
-"налоги. В этом случае, сумма подитогов по строке будет эквивалентна итогу, "
-"включающему налоги."
 
 #. module: website_sale
 #: model:sale.order.line,website_description:website_sale.website_sale_order_line_1
@@ -1588,7 +1583,7 @@ msgid "Enter a name for your new product"
 msgstr "Введите название вашего нового продукта"
 
 #. module: website_sale
-#: code:addons/website_sale/models/product.py:92
+#: code:addons/website_sale/models/product.py:91
 #, python-format
 msgid "Error ! You cannot create recursive categories."
 msgstr "Ошибка! Нельзя создавать рекурсивные категории."
@@ -1660,11 +1655,6 @@ msgstr "Быстрое соединение. Во всем мире."
 #: model:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "FedEx"
 msgstr ""
-
-#. module: website_sale
-#: model:ir.model,name:website_sale.model_ir_model_fields
-msgid "Fields"
-msgstr "Поля"
 
 #. module: website_sale
 #: model:ir.actions.act_window,help:website_sale.action_abandoned_orders_ecommerce
@@ -1748,6 +1738,7 @@ msgid "Have Genius call the tunes."
 msgstr "Попросите Genius назвать мелодии."
 
 #. module: website_sale
+#: model:ir.ui.view,arch_db:website_sale.payment
 #: model:ir.ui.view,arch_db:website_sale.reduction_code
 msgid "Have a promo code? Fill in this field and apply."
 msgstr ""
@@ -1930,7 +1921,7 @@ msgid "Installs *e-Commerce Inventory*"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:502
+#: code:addons/website_sale/controllers/main.py:501
 #, python-format
 msgid "Invalid Email! Please enter a valid email address."
 msgstr ""
@@ -2195,7 +2186,7 @@ msgstr "Сеть"
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/controllers/main.py:968
+#: code:addons/website_sale/controllers/main.py:964
 #: code:addons/website_sale/static/src/js/website_sale.editor.js:32
 #: model:ir.ui.view,arch_db:website_sale.content_new_product
 #, python-format
@@ -2346,8 +2337,7 @@ msgid "Parent Category"
 msgstr "Категория предка"
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:756
-#: model:ir.ui.view,arch_db:website_sale.payment
+#: code:addons/website_sale/controllers/main.py:752
 #, python-format
 msgid "Pay Now"
 msgstr "Оплатить сейчас"
@@ -2372,11 +2362,6 @@ msgstr "Платежные системы"
 #: model:ir.ui.view,arch_db:website_sale.report_shop_saleorder_document
 msgid "Payment Information"
 msgstr "Платежная информация"
-
-#. module: website_sale
-#: model:ir.model,name:website_sale.model_payment_transaction
-msgid "Payment Transaction"
-msgstr "Операция Оплаты"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -2547,7 +2532,7 @@ msgstr "Страницы продукта"
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Product Prices"
-msgstr "Цены товаров"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.product_public_category_tree_view
@@ -2601,6 +2586,11 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_sale.product
 msgid "Products"
 msgstr "Продукты"
+
+#. module: website_sale
+#: model:ir.ui.view,arch_db:website_sale.reduction_code
+msgid "Promo Code"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_sale
@@ -2814,7 +2804,7 @@ msgstr "Продажи"
 #: model:ir.model.fields,field_description:website_sale.field_website_salesteam_id
 #: model:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Sales Channel"
-msgstr "Канал продаж"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.sale_report_view_pivot_website
@@ -2952,7 +2942,7 @@ msgstr ""
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Send a recovery email to authenticated shoppers"
+msgid "Send a recovery email to authentified shoppers"
 msgstr ""
 
 #. module: website_sale
@@ -3116,7 +3106,7 @@ msgstr ""
 "использоваться как платежные шлюзы с процессом оплаты."
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:520
+#: code:addons/website_sale/controllers/main.py:517
 #, python-format
 msgid "Some required fields are empty."
 msgstr "Некоторые обязательные поля не заполнены."
@@ -3436,11 +3426,6 @@ msgid "Total"
 msgstr "Всего"
 
 #. module: website_sale
-#: model:ir.ui.view,arch_db:website_sale.cart_popover
-msgid "True"
-msgstr ""
-
-#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_attribute_type
 msgid "Type"
 msgstr "Тип"
@@ -3568,12 +3553,6 @@ msgstr "Мета-название Веб-сайта"
 #: model:ir.model.fields,field_description:website_sale.field_product_template_website_price
 msgid "Website price"
 msgstr "Вебсайт цена"
-
-#. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_product_product_website_price_difference
-#: model:ir.model.fields,field_description:website_sale.field_product_template_website_price_difference
-msgid "Website price difference"
-msgstr ""
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_public_price
@@ -3708,11 +3687,6 @@ msgstr "Ссылка"
 #: model:ir.ui.view,arch_db:website_sale.cart_popover
 msgid "Your cart is empty!"
 msgstr "Ваша корзина пуста!"
-
-#. module: website_sale
-#: model:ir.ui.view,arch_db:website_sale.payment_confirmation_status
-msgid "Your payment has been authorized."
-msgstr "Ваш платеж был подтвержден."
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.cart

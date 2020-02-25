@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo, Flectra. See LICENSE file for full copyright and licensing details.
+# Part of Odoo,Flectra. See LICENSE file for full copyright and licensing details.
 
 import logging
 
@@ -14,15 +14,17 @@ class Website(models.Model):
     _inherit = 'website'
 
     pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
-    currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', related_sudo=False, string='Default Currency')
+    currency_id = fields.Many2one('res.currency', related='pricelist_id.currency_id', string='Default Currency')
     salesperson_id = fields.Many2one('res.users', string='Salesperson')
     salesteam_id = fields.Many2one('crm.team', string='Sales Channel')
-    pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
-                                    string='Price list available for this Ecommerce/Website')
+    pricelist_ids = fields.One2many('website.product.pricelist', compute="_compute_pricelist_ids",
+                                    string='Price list available for  this Ecommerce/Website')
 
     @api.one
     def _compute_pricelist_ids(self):
-        self.pricelist_ids = self.env["product.pricelist"].search([("website_ids", "in", self.id)])
+        for website in self:
+            website.pricelist_ids = website.env["website.product.pricelist"].search([("website_id", "=", website.id)])
+        # self.pricelist_ids = self.env["product.pricelist"].search([("website_id", "=", self.id)])
 
     @api.multi
     def _compute_pricelist_id(self):
@@ -32,8 +34,8 @@ class Website(models.Model):
             website.pricelist_id = website.get_current_pricelist()
 
     # This method is cached, must not return records! See also #8795
-    @tools.ormcache('self.env.uid', 'country_code', 'show_visible', 'website_pl', 'current_pl', 'all_pl', 'partner_pl', 'order_pl')
-    def _get_pl_partner_order(self, country_code, show_visible, website_pl, current_pl, all_pl, partner_pl=False, order_pl=False):
+    @tools.ormcache('self.env.uid', 'country_code', 'show_visible', 'website_pl', 'current_pl', 'all_pls', 'partner_pl', 'order_pl')
+    def _get_pl_partner_order(self, country_code, show_visible, website_pl, current_pl, all_pls, partner_pl=False, order_pl=False):
         """ Return the list of pricelists that can be used on website for the current user.
         :param str country_code: code iso or False, If set, we search only price list available for this country
         :param bool show_visible: if True, we don't display pricelist where selectable is False (Eg: Code promo)
@@ -49,19 +51,21 @@ class Website(models.Model):
         if country_code:
             for cgroup in self.env['res.country.group'].search([('country_ids.code', '=', country_code)]):
                 for group_pricelists in cgroup.pricelist_ids:
-                    if not show_visible or group_pricelists.selectable or group_pricelists.id in (current_pl, order_pl):
+                    if not show_visible or group_pricelists.website_id.filtered(lambda web_pl: web_pl.website_id == self.get_current_website() and web_pl.selectable) or group_pricelists.id in (current_pl, order_pl):
                         pricelists |= group_pricelists
 
         partner = self.env.user.partner_id
         is_public = self.user_id.id == self.env.user.id
         if not is_public and (not pricelists or (partner_pl or partner.property_product_pricelist.id) != website_pl):
-            if partner.property_product_pricelist.website_ids:
+            if partner.property_product_pricelist.website_id:
                 pricelists |= partner.property_product_pricelist
 
         if not pricelists:  # no pricelist for this country, or no GeoIP
-            pricelists |= all_pl.filtered(lambda pl: not show_visible or pl.selectable or pl.id in (current_pl, order_pl))
+            for all_pl in all_pls:
+                pricelists |= all_pl.pricelist_id.filtered(lambda pl: not show_visible or (all_pl.pricelist_id == pl and all_pl.selectable) or pl.id in (current_pl, order_pl))
         else:
-            pricelists |= all_pl.filtered(lambda pl: not show_visible and pl.sudo().code)
+            for all_pl in all_pls:
+                pricelists |= all_pl.pricelist_id.filtered(lambda pl: not show_visible and pl.sudo().code)
 
         # This method is cached, must not return records! See also #8795
         return pricelists.ids
@@ -82,7 +86,7 @@ class Website(models.Model):
             if self.env.context.get('website_id'):
                 website = self.browse(self.env.context['website_id'])
             else:
-                # In the weird case we are coming from the backend (https://github.com/odoo/odoo/issues/20245)
+                # In the weird case we are coming from the backend
                 website = len(self) == 1 and self or self.search([], limit=1)
         isocountry = request and request.session.geoip and request.session.geoip.get('country_code') or False
         partner = self.env.user.partner_id
@@ -149,11 +153,8 @@ class Website(models.Model):
 
     @api.model
     def sale_get_payment_term(self, partner):
-        return (
-            partner.property_payment_term_id or
-            self.env.ref('account.account_payment_term_immediate', False) or
-            self.env['account.payment.term'].sudo().search([('company_id', '=', self.company_id.id)], limit=1)
-        ).id
+        DEFAULT_PAYMENT_TERM = 'account.account_payment_term_immediate'
+        return partner.property_payment_term_id.id or self.env.ref(DEFAULT_PAYMENT_TERM, False).id
 
     @api.multi
     def _prepare_sale_order_values(self, partner, pricelist):
